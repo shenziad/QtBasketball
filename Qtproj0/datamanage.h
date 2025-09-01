@@ -17,25 +17,26 @@ public:
     // 添加新的比赛数据
     bool addGameStats(const PlayerStats& stats);
 
-    // 保存数据到文件
+    // 文件操作
     bool saveGameStats(const QString& filename);
     bool saveSummaryStats(const QString& filename);
-
-    // 从文件加载数据
     bool loadGameStats(const QString& filename);
     bool loadSummaryStats(const QString& filename);
 
-    // 获取汇总数据
+    // 数据查询
+    QVector<PlayerStats> getAllGames() const { return m_gameStats; }
     QVector<PlayerStatsSummary> getAllPlayersSummary() const;
-    
-    // 获取指定技术项目平均每场数据最高的前三名
     QVector<PlayerStatsSummary> getTopThreeByAverage(const QString& category) const;
-    
-    // 获取某个队中个人数据最高的前三名
     QVector<PlayerStatsSummary> getTopThreeInTeam(const QString& team) const;
-
-    // 获取所有队伍名称
     QStringList getAllTeams() const;
+
+    // 数据验证
+    bool isPlayerExists(const QString& name) const { return m_summaryStats.contains(name); }
+    const PlayerStatsSummary* getPlayerSummary(const QString& name) const;
+    int getGameCount() const { return m_gameStats.size(); }
+    
+signals:
+    void dataChanged();  // 当数据发生变化时发出的信号
 
 private:
     QVector<PlayerStats> m_gameStats;          // 所有比赛数据

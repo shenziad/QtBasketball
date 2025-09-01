@@ -1,6 +1,7 @@
 #include "datamanage.h"
 #include <QFile>
 #include <QDataStream>
+#include <QDir>
 #include <algorithm>
 
 DataManage::DataManage(QObject *parent)
@@ -14,8 +15,15 @@ DataManage::~DataManage()
 
 bool DataManage::addGameStats(const PlayerStats& stats)
 {
+    // 添加到比赛记录
     m_gameStats.append(stats);
+    
+    // 更新汇总数据
     updateSummaryStats(stats);
+    
+    // 发出数据变化信号
+    emit dataChanged();
+    
     return true;
 }
 
@@ -30,12 +38,19 @@ void DataManage::updateSummaryStats(const PlayerStats& stats)
 
 bool DataManage::saveGameStats(const QString& filename)
 {
+    // 确保目录存在
+    QDir dir = QFileInfo(filename).dir();
+    if (!dir.exists()) {
+        dir.mkpath(".");
+    }
+
     QFile file(filename);
     if (!file.open(QIODevice::WriteOnly)) {
         return false;
     }
 
     QDataStream out(&file);
+    out.setVersion(QDataStream::Qt_5_15);  // 设置版本以确保兼容性
     out << m_gameStats;
     file.close();
     return true;
@@ -43,12 +58,19 @@ bool DataManage::saveGameStats(const QString& filename)
 
 bool DataManage::saveSummaryStats(const QString& filename)
 {
+    // 确保目录存在
+    QDir dir = QFileInfo(filename).dir();
+    if (!dir.exists()) {
+        dir.mkpath(".");
+    }
+
     QFile file(filename);
     if (!file.open(QIODevice::WriteOnly)) {
         return false;
     }
 
     QDataStream out(&file);
+    out.setVersion(QDataStream::Qt_5_15);  // 设置版本以确保兼容性
     out << m_summaryStats;
     file.close();
     return true;
@@ -57,11 +79,19 @@ bool DataManage::saveSummaryStats(const QString& filename)
 bool DataManage::loadGameStats(const QString& filename)
 {
     QFile file(filename);
+    if (!file.exists()) {
+        // 如果文件不存在，创建空文件
+        m_gameStats.clear();
+        return saveGameStats(filename);
+    }
+    
     if (!file.open(QIODevice::ReadOnly)) {
         return false;
     }
 
     QDataStream in(&file);
+    in.setVersion(QDataStream::Qt_5_15);  // 设置版本以确保兼容性
+    
     m_gameStats.clear();
     in >> m_gameStats;
     
@@ -78,11 +108,19 @@ bool DataManage::loadGameStats(const QString& filename)
 bool DataManage::loadSummaryStats(const QString& filename)
 {
     QFile file(filename);
+    if (!file.exists()) {
+        // 如果文件不存在，创建空文件
+        m_summaryStats.clear();
+        return saveSummaryStats(filename);
+    }
+    
     if (!file.open(QIODevice::ReadOnly)) {
         return false;
     }
 
     QDataStream in(&file);
+    in.setVersion(QDataStream::Qt_5_15);  // 设置版本以确保兼容性
+    
     m_summaryStats.clear();
     in >> m_summaryStats;
     file.close();
@@ -95,7 +133,23 @@ QVector<PlayerStatsSummary> DataManage::getAllPlayersSummary() const
     for (const auto& summary : m_summaryStats) {
         result.append(summary);
     }
+    
+    // 按总得分降序排序
+    std::sort(result.begin(), result.end(),
+              [](const PlayerStatsSummary& a, const PlayerStatsSummary& b) {
+                  return a.totalPoints > b.totalPoints;
+              });
+              
     return result;
+}
+
+const PlayerStatsSummary* DataManage::getPlayerSummary(const QString& name) const
+{
+    auto it = m_summaryStats.find(name);
+    if (it != m_summaryStats.end()) {
+        return &it.value();
+    }
+    return nullptr;
 }
 
 bool DataManage::compareByCategory(const PlayerStatsSummary& a, 
