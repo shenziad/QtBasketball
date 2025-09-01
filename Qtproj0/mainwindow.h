@@ -5,6 +5,10 @@
 #include <QTableWidget>
 #include <QTableWidgetItem>
 #include <QString>
+#include <QVector>
+#include <QPair>
+#include <QDir>
+#include <QMessageBox>
 
 QT_BEGIN_NAMESPACE
 class QTableWidget;
@@ -39,17 +43,22 @@ private slots:
     void onDataChanged();  // 响应数据变化的槽函数
 
 private:
-    Ui::MainWindow *ui;
-    DataManage* m_dataManager;
+    // 静态常量
+    static inline const QString GAME_STATS_FILE = QStringLiteral("game_stats.dat");
+    static inline const QString SUMMARY_STATS_FILE = QStringLiteral("summary_stats.dat");
     
+    // 成员变量
+    DataManage* m_dataManager;            // 数据管理器
+    Ui::MainWindow *ui;                   // UI对象
+    QVector<QPair<QString, QString>> m_presetPlayers; // 预设球员列表 <姓名, 队伍>
+    
+    // 成员函数
     void createMenus();
     void setupConnections();
     void updateDisplay();
-    void initializeTables();  // 初始化表格
-    
-    // 文件名常量
-    static const QString GAME_STATS_FILE;
-    static const QString SUMMARY_STATS_FILE;
+    void initializeTables();              // 初始化表格
+    void showPlayerDetailedStats(const QString& playerName); // 显示球员详细统计
+    void initializePresetData();          // 初始化预设球员和队伍
     
     // 表格操作辅助函数
     QTableWidgetItem* createReadOnlyItem(const QString& text);

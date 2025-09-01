@@ -4,43 +4,32 @@
 #include "addgamestat_log.h"
 #include "searchtopteam_log.h"
 #include "searchave_log.h"
-
-// 静态成员变量定义
-const QString MainWindow::GAME_STATS_FILE = QStringLiteral("game_stats.dat");
-const QString MainWindow::SUMMARY_STATS_FILE = QStringLiteral("summary_stats.dat");
-
-#include <QMenuBar>
-#include <QMenu>
-#include <QAction>
-#include <QMessageBox>
-#include <QFileDialog>
-#include <QInputDialog>
-#include <QTextEdit>
-#include <QHeaderView>
-#include <QTableWidget>
-#include <QTableWidgetItem>
-#include <QFile>
-#include <QStatusBar>
-#include <QDir>
+#include "playerdatatable.h"
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
+    , m_dataManager(new DataManage(this))  // 数据管理器应该在 UI 之前初始化
     , ui(new Ui::MainWindow)
-    , m_dataManager(new DataManage(this))
 {
     ui->setupUi(this);
+    initializePresetData();  // 初始化预设数据
     setupConnections();
     initializeTables();
 
     // 创建数据目录
-    QDir dataDir(QDir::current());
+    QDir dataDir = QDir::current();
     if (!dataDir.exists("data")) {
-        dataDir.mkdir("data");
+        if (!dataDir.mkdir("data")) {
+            QMessageBox::warning(this, tr("错误"),
+                tr("无法创建数据目录，请检查权限。"));
+            return;
+        }
     }
+    dataDir.cd("data");  // 进入数据目录
     
     // 构建文件路径
-    QString gamePath = dataDir.filePath("data/" + GAME_STATS_FILE);
-    QString summaryPath = dataDir.filePath("data/" + SUMMARY_STATS_FILE);
+    QString gamePath = dataDir.filePath(GAME_STATS_FILE);
+    QString summaryPath = dataDir.filePath(SUMMARY_STATS_FILE);
 
     // 尝试加载已有数据
     bool isFirstRun = !QFile::exists(gamePath);
@@ -50,12 +39,18 @@ MainWindow::MainWindow(QWidget *parent)
             tr("欢迎使用篮球联赛个人技术数据处理系统！\n"
                "这是系统第一次运行，将为您创建数据存储系统。"));
         // 创建并保存空的数据文件
-        m_dataManager->saveGameStats(gamePath);
-        m_dataManager->saveSummaryStats(summaryPath);
+        if (!m_dataManager->saveGameStats(gamePath) ||
+            !m_dataManager->saveSummaryStats(summaryPath)) {
+            QMessageBox::warning(this, tr("错误"),
+                tr("无法创建数据文件，请检查磁盘空间和权限。"));
+        }
     } else {
         // 加载已有数据
-        if (m_dataManager->loadGameStats(gamePath)) {
-            m_dataManager->loadSummaryStats(summaryPath);
+        if (!m_dataManager->loadGameStats(gamePath) ||
+            !m_dataManager->loadSummaryStats(summaryPath)) {
+            QMessageBox::warning(this, tr("错误"),
+                tr("无法加载数据文件，文件可能已损坏。"));
+        } else {
             updateDisplay();
         }
     }
@@ -91,8 +86,11 @@ void MainWindow::onDataChanged()
 {
     updateDisplay();
     // 自动保存数据
-    m_dataManager->saveGameStats(GAME_STATS_FILE);
-    m_dataManager->saveSummaryStats(SUMMARY_STATS_FILE);
+    QString gamePath = QDir(QDir::current()).filePath("data/" + GAME_STATS_FILE);
+    QString summaryPath = QDir(QDir::current()).filePath("data/" + SUMMARY_STATS_FILE);
+    
+    m_dataManager->saveGameStats(gamePath);
+    m_dataManager->saveSummaryStats(summaryPath);
 }
 
 void MainWindow::setupConnections()
@@ -117,7 +115,15 @@ void MainWindow::setupConnections()
     connect(m_dataManager, &DataManage::dataChanged,
             this, &MainWindow::onDataChanged);
             
-    // 设置表格双击事件
+    // 设置汇总表格双击事件 - 显示球员详细统计
+    connect(ui->summaryTableWidget, &QTableWidget::itemDoubleClicked,
+            [this](QTableWidgetItem* item) {
+                int row = item->row();
+                QString playerName = ui->summaryTableWidget->item(row, 0)->text();
+                showPlayerDetailedStats(playerName);
+            });
+            
+    // 设置比赛记录表格双击事件
     connect(ui->gamesTableWidget, &QTableWidget::itemDoubleClicked,
             [this](QTableWidgetItem* item) {
                 // 显示详细信息
@@ -166,13 +172,18 @@ void MainWindow::initializeTables()
     
     // 设置列宽
     for (QTableWidget* table : {ui->summaryTableWidget, ui->gamesTableWidget}) {
-        table->horizontalHeader()->setSectionResizeMode(0, QHeaderView::ResizeToContents);  // 姓名/日期列
-        table->horizontalHeader()->setSectionResizeMode(1, QHeaderView::ResizeToContents);  // 队伍/姓名列
+        // 先设置所有列为Fixed，防止自动调整
+        for (int i = 0; i < table->columnCount(); ++i) {
+            table->horizontalHeader()->setSectionResizeMode(i, QHeaderView::Fixed);
+        }
+        
+        // 姓名/日期列和队伍/姓名列自适应内容
+        table->horizontalHeader()->setSectionResizeMode(0, QHeaderView::ResizeToContents);
+        table->horizontalHeader()->setSectionResizeMode(1, QHeaderView::ResizeToContents);
         
         // 数据列固定宽度
         for (int i = 2; i < table->columnCount() - 1; ++i) {
-            table->horizontalHeader()->setSectionResizeMode(i, QHeaderView::Fixed);
-            table->setColumnWidth(i, 60);
+            table->setColumnWidth(i, 70);  // 稍微加宽，确保数字显示完整
         }
         
         // 最后一列自适应
@@ -251,8 +262,11 @@ void MainWindow::on_actionNewGame_triggered()
 
 void MainWindow::on_actionSave_triggered()
 {
-    if (m_dataManager->saveGameStats(GAME_STATS_FILE) &&
-        m_dataManager->saveSummaryStats(SUMMARY_STATS_FILE)) {
+    QString gamePath = QDir(QDir::current()).filePath("data/" + GAME_STATS_FILE);
+    QString summaryPath = QDir(QDir::current()).filePath("data/" + SUMMARY_STATS_FILE);
+    
+    if (m_dataManager->saveGameStats(gamePath) &&
+        m_dataManager->saveSummaryStats(summaryPath)) {
         QMessageBox::information(this, tr("保存成功"),
                                tr("数据已成功保存到文件。"));
     } else {
@@ -263,8 +277,11 @@ void MainWindow::on_actionSave_triggered()
 
 void MainWindow::on_actionLoad_triggered()
 {
-    if (m_dataManager->loadGameStats(GAME_STATS_FILE) &&
-        m_dataManager->loadSummaryStats(SUMMARY_STATS_FILE)) {
+    QString gamePath = QDir(QDir::current()).filePath("data/" + GAME_STATS_FILE);
+    QString summaryPath = QDir(QDir::current()).filePath("data/" + SUMMARY_STATS_FILE);
+    
+    if (m_dataManager->loadGameStats(gamePath) &&
+        m_dataManager->loadSummaryStats(summaryPath)) {
         updateDisplay();
         QMessageBox::information(this, tr("加载成功"),
                                tr("数据已成功从文件加载。"));
@@ -289,4 +306,84 @@ void MainWindow::on_actionTeamTopThree_triggered()
 {
     SearchTopteam_Log dialog(m_dataManager, this);
     dialog.exec();
+}
+
+void MainWindow::initializePresetData()
+{
+    // 预设的球队
+    QStringList teams = {
+        "勇士队", "湖人队", "凯尔特人", "独行侠", "火箭队"
+    };
+    
+    // 预设的球员及其所属球队
+    m_presetPlayers = {
+        {"斯蒂芬·库里", "勇士队"},
+        {"克莱·汤普森", "勇士队"},
+        {"德雷蒙德·格林", "勇士队"},
+        {"安德鲁·威金斯", "勇士队"},
+        
+        {"勒布朗·詹姆斯", "湖人队"},
+        {"安东尼·戴维斯", "湖人队"},
+        {"拉塞尔·威斯布鲁克", "湖人队"},
+        {"奥斯汀·里夫斯", "湖人队"},
+        
+        {"杰森·塔图姆", "凯尔特人"},
+        {"杰伦·布朗", "凯尔特人"},
+        {"克里斯托弗·波尔津吉斯", "凯尔特人"},
+        {"德里克·怀特", "凯尔特人"},
+        
+        {"卢卡·东契奇", "独行侠"},
+        {"凯里·欧文", "独行侠"},
+        {"格兰特·威廉姆斯", "独行侠"},
+        {"蒂姆·哈达威Jr", "独行侠"},
+        
+        {"阿尔佩伦·申京", "火箭队"},
+        {"贾巴里·史密斯", "火箭队"},
+        {"弗雷德·范弗利特", "火箭队"},
+        {"杰伦·格林", "火箭队"}
+    };
+}
+
+void MainWindow::showPlayerDetailedStats(const QString& playerName)
+{
+    // 获取该球员的所有比赛记录
+    QVector<PlayerStats> allGames = m_dataManager->getAllGames();
+    QVector<PlayerStats> playerGames;
+    
+    // 过滤出该球员的比赛记录
+    for (const auto& game : allGames) {
+        if (game.getName() == playerName) {
+            playerGames.append(game);
+        }
+    }
+    
+    if (playerGames.isEmpty()) {
+        QMessageBox::information(this, tr("提示"),
+            tr("该球员暂无比赛记录。"));
+        return;
+    }
+    
+    // 创建详细统计表格窗口
+    PlayerDataTable* detailWindow = new PlayerDataTable(playerName, this);
+    detailWindow->setAttribute(Qt::WA_DeleteOnClose);
+    
+    // 设置表格数据
+    for (const auto& game : playerGames) {
+        detailWindow->addGameRecord(
+            game.getDate(),
+            game.getTeam(),
+            game.getPoints(),
+            game.getThreePoints(),
+            game.getRebounds(),
+            game.getDunks(),
+            game.getSteals()
+        );
+    }
+    
+    // 计算并显示平均数据
+    detailWindow->calculateAndShowAverages();
+    
+    // 显示窗口
+    detailWindow->resize(800, 500);
+    detailWindow->show();
 }
