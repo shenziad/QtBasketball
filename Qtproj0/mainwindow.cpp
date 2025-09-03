@@ -153,11 +153,11 @@ void MainWindow::setupConnections()
 void MainWindow::initializeTables()
 {
     // 设置汇总表格的列
-    ui->summaryTableWidget->setColumnCount(9);
+    ui->summaryTableWidget->setColumnCount(10);  // 增加一列用于查看按钮
     ui->summaryTableWidget->setHorizontalHeaderLabels(QStringList()
         << tr("姓名") << tr("队伍") << tr("场次")
         << tr("总得分") << tr("总三分") << tr("总篮板")
-        << tr("总扣篮") << tr("总抢断") << tr("场均得分"));
+        << tr("总扣篮") << tr("总抢断") << tr("场均得分") << tr("操作"));
         
     // 设置比赛记录表格的列
     ui->gamesTableWidget->setColumnCount(9);
@@ -219,6 +219,14 @@ void MainWindow::updateDisplay()
         QTableWidgetItem* avgItem = createReadOnlyItem(QString::number(summary.getAveragePoints(), 'f', 2));
         avgItem->setTextAlignment(Qt::AlignRight | Qt::AlignVCenter);
         ui->summaryTableWidget->setItem(i, col++, avgItem);
+
+        // 添加查看详情按钮
+        QPushButton* detailsButton = new QPushButton(tr("查看详情"));
+        detailsButton->setProperty("playerName", summary.name);
+        connect(detailsButton, &QPushButton::clicked, this, [this, name = summary.name]() {
+            showPlayerDetailedStats(name);
+        });
+        ui->summaryTableWidget->setCellWidget(i, col++, detailsButton);
     }
     ui->summaryTableWidget->resizeColumnsToContents();
     

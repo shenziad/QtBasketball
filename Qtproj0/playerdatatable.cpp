@@ -46,14 +46,24 @@ void PlayerDataTable::setupUI()
     m_averagesLabel = new QLabel(this);
     m_averagesLabel->setAlignment(Qt::AlignCenter);
     
+    // 创建按钮布局
+    QHBoxLayout* buttonLayout = new QHBoxLayout;
+    
     // 导出按钮
     m_exportButton = new QPushButton(tr("导出到文件"), this);
     connect(m_exportButton, &QPushButton::clicked, this, &PlayerDataTable::exportToFile);
     
+    // 返回按钮
+    QPushButton* returnButton = new QPushButton(tr("返回主界面"), this);
+    connect(returnButton, &QPushButton::clicked, this, &QWidget::close);
+    
+    buttonLayout->addWidget(m_exportButton);
+    buttonLayout->addWidget(returnButton);
+    
     mainLayout->addWidget(m_titleLabel);
     mainLayout->addWidget(m_tableWidget);
     mainLayout->addWidget(m_averagesLabel);
-    mainLayout->addWidget(m_exportButton);
+    mainLayout->addLayout(buttonLayout);
     
     setLayout(mainLayout);
     setWindowTitle(tr("%1 的技术统计").arg(m_playerName));
@@ -125,12 +135,18 @@ void PlayerDataTable::calculateAndShowAverages()
     
     int games = m_tableWidget->rowCount();
     
-    QString averagesText = tr("场均数据：得分 %.1f  三分 %.1f  篮板 %.1f  扣篮 %.1f  抢断 %.1f  （共 %d 场比赛）")
-        .arg(totalPoints / games, 0, 'f', 1)
-        .arg(totalThrees / games, 0, 'f', 1)
-        .arg(totalRebounds / games, 0, 'f', 1)
-        .arg(totalDunks / games, 0, 'f', 1)
-        .arg(totalSteals / games, 0, 'f', 1)
+    double avgPoints = totalPoints / games;
+    double avgThrees = totalThrees / games;
+    double avgRebounds = totalRebounds / games;
+    double avgDunks = totalDunks / games;
+    double avgSteals = totalSteals / games;
+    
+    QString averagesText = QString("场均数据：得分 %1  三分 %2  篮板 %3  扣篮 %4  抢断 %5  （共 %6 场比赛）")
+        .arg(avgPoints, 0, 'f', 1)
+        .arg(avgThrees, 0, 'f', 1)
+        .arg(avgRebounds, 0, 'f', 1)
+        .arg(avgDunks, 0, 'f', 1)
+        .arg(avgSteals, 0, 'f', 1)
         .arg(games);
         
     m_averagesLabel->setText(averagesText);
