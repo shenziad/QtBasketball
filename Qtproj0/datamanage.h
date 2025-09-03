@@ -38,6 +38,13 @@ public:
 signals:
     void dataChanged();  // 当数据发生变化时发出的信号
 
+public:
+    // 获取下一个比赛ID
+    int getNextGameId() const { return m_gameStats.isEmpty() ? 1 : m_gameStats.last().getGameId() + 1; }
+
+    // 批量添加同一场比赛的数据
+    bool addGameStats(const QVector<PlayerStats>& stats);
+
 private:
     QVector<PlayerStats> m_gameStats;          // 所有比赛数据
     QMap<QString, PlayerStatsSummary> m_summaryStats;  // 汇总数据，按球员名字索引

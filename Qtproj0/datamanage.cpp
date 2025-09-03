@@ -27,6 +27,24 @@ bool DataManage::addGameStats(const PlayerStats& stats)
     return true;
 }
 
+bool DataManage::addGameStats(const QVector<PlayerStats>& stats)
+{
+    if (stats.isEmpty()) {
+        return false;
+    }
+    
+    // 添加所有球员的比赛数据
+    for (const auto& stat : stats) {
+        m_gameStats.append(stat);
+        updateSummaryStats(stat);
+    }
+    
+    // 发出数据变化信号
+    emit dataChanged();
+    
+    return true;
+}
+
 void DataManage::updateSummaryStats(const PlayerStats& stats)
 {
     QString playerName = stats.getName();

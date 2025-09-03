@@ -1,15 +1,17 @@
 #include "playerstats.h"
 
 PlayerStats::PlayerStats()
-    : m_threePoints(0), m_rebounds(0), m_dunks(0)
+    : m_gameId(0), m_threePoints(0), m_rebounds(0), m_dunks(0)
     , m_steals(0), m_points(0)
 {
 }
 
 PlayerStats::PlayerStats(const QString& name, const QString& team,
                        int threePoints, int rebounds, int dunks,
-                       int steals, int points, const QDate& date)
+                       int steals, int points, const QDate& date,
+                       int gameId, const QString& gameName)
     : m_name(name), m_team(team)
+    , m_gameName(gameName), m_gameId(gameId)
     , m_threePoints(threePoints), m_rebounds(rebounds)
     , m_dunks(dunks), m_steals(steals)
     , m_points(points), m_date(date)
@@ -18,7 +20,7 @@ PlayerStats::PlayerStats(const QString& name, const QString& team,
 
 QDataStream& operator<<(QDataStream& out, const PlayerStats& stats)
 {
-    out << stats.m_name << stats.m_team
+    out << stats.m_name << stats.m_team << stats.m_gameName << stats.m_gameId
         << stats.m_threePoints << stats.m_rebounds
         << stats.m_dunks << stats.m_steals
         << stats.m_points << stats.m_date;
@@ -27,7 +29,7 @@ QDataStream& operator<<(QDataStream& out, const PlayerStats& stats)
 
 QDataStream& operator>>(QDataStream& in, PlayerStats& stats)
 {
-    in >> stats.m_name >> stats.m_team
+    in >> stats.m_name >> stats.m_team >> stats.m_gameName >> stats.m_gameId
        >> stats.m_threePoints >> stats.m_rebounds
        >> stats.m_dunks >> stats.m_steals
        >> stats.m_points >> stats.m_date;

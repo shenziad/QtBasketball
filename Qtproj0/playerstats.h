@@ -11,11 +11,14 @@ public:
     PlayerStats();
     PlayerStats(const QString& name, const QString& team,
                 int threePoints, int rebounds, int dunks,
-                int steals, int points, const QDate& date);
+                int steals, int points, const QDate& date,
+                int gameId = 0, const QString& gameName = QString());
 
     // Getters
     QString getName() const { return m_name; }
     QString getTeam() const { return m_team; }
+    QString getGameName() const { return m_gameName; }
+    int getGameId() const { return m_gameId; }
     int getThreePoints() const { return m_threePoints; }
     int getRebounds() const { return m_rebounds; }
     int getDunks() const { return m_dunks; }
@@ -26,6 +29,8 @@ public:
     // Setters
     void setName(const QString& name) { m_name = name; }
     void setTeam(const QString& team) { m_team = team; }
+    void setGameName(const QString& gameName) { m_gameName = gameName; }
+    void setGameId(int gameId) { m_gameId = gameId; }
     void setThreePoints(int threePoints) { m_threePoints = threePoints; }
     void setRebounds(int rebounds) { m_rebounds = rebounds; }
     void setDunks(int dunks) { m_dunks = dunks; }
@@ -38,14 +43,16 @@ public:
     friend QDataStream& operator>>(QDataStream& in, PlayerStats& stats);
 
 private:
-    QString m_name;     // 球员姓名
-    QString m_team;     // 所属队名
-    int m_threePoints;  // 三分球个数
-    int m_rebounds;     // 篮板球个数
-    int m_dunks;       // 扣篮成功次数
-    int m_steals;      // 抢断次数
-    int m_points;      // 得分
-    QDate m_date;      // 比赛日期
+    QString m_name;        // 球员姓名
+    QString m_team;        // 所属队名
+    QString m_gameName;    // 比赛名称
+    int m_gameId;         // 比赛ID
+    int m_threePoints;    // 三分球个数
+    int m_rebounds;       // 篮板球个数
+    int m_dunks;          // 扣篮成功次数
+    int m_steals;         // 抢断次数
+    int m_points;         // 得分
+    QDate m_date;         // 比赛日期
 };
 
 // 定义用于汇总的数据结构

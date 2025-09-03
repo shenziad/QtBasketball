@@ -15,138 +15,154 @@
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
-    <layout class="QFormLayout" name="formLayout">
-     <item row="0" column="0">
-      <widget class="QLabel" name="nameLabel">
+    <widget class="QGroupBox" name="gameInfoGroup">
+     <property name="title">
+      <string>比赛基本信息</string>
+     </property>
+     <layout class="QFormLayout" name="gameInfoLayout">
+      <item row="0" column="0">
+       <widget class="QLabel" name="gameNameLabel">
+        <property name="text">
+         <string>比赛名称：</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <widget class="QLineEdit" name="gameNameEdit"/>
+      </item>
+      <item row="1" column="0">
+       <widget class="QLabel" name="dateLabel">
+        <property name="text">
+         <string>比赛日期：</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1">
+       <widget class="QDateEdit" name="dateEdit"/>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QGroupBox" name="playerStatsGroup">
+     <property name="title">
+      <string>球员数据</string>
+     </property>
+     <layout class="QFormLayout" name="formLayout">
+      <item row="0" column="0">
+       <widget class="QLabel" name="nameLabel">
+        <property name="text">
+         <string>球员姓名：</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <widget class="QLineEdit" name="nameLineEdit"/>
+      </item>
+      <item row="1" column="0">
+       <widget class="QLabel" name="teamLabel">
+        <property name="text">
+         <string>所属队伍：</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1">
+       <widget class="QComboBox" name="teamComboBox"/>
+      </item>
+      <item row="2" column="0">
+       <widget class="QLabel" name="threePointsLabel">
+        <property name="text">
+         <string>三分球数：</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="1">
+       <widget class="QSpinBox" name="threePointsSpinBox"/>
+      </item>
+      <item row="3" column="0">
+       <widget class="QLabel" name="reboundsLabel">
+        <property name="text">
+         <string>篮板数：</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="1">
+       <widget class="QSpinBox" name="reboundsSpinBox"/>
+      </item>
+      <item row="4" column="0">
+       <widget class="QLabel" name="dunksLabel">
+        <property name="text">
+         <string>扣篮数：</string>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="1">
+       <widget class="QSpinBox" name="dunksSpinBox"/>
+      </item>
+      <item row="5" column="0">
+       <widget class="QLabel" name="stealsLabel">
+        <property name="text">
+         <string>抢断数：</string>
+        </property>
+       </widget>
+      </item>
+      <item row="5" column="1">
+       <widget class="QSpinBox" name="stealsSpinBox"/>
+      </item>
+      <item row="6" column="0">
+       <widget class="QLabel" name="pointsLabel">
+        <property name="text">
+         <string>得分：</string>
+        </property>
+       </widget>
+      </item>
+      <item row="6" column="1">
+       <widget class="QSpinBox" name="pointsSpinBox">
+        <property name="maximum">
+         <number>200</number>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QTableWidget" name="playersTable"/>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="buttonLayout">
+     <item>
+      <widget class="QPushButton" name="addPlayerButton">
        <property name="text">
-        <string>球员姓名：</string>
+        <string>添加球员</string>
        </property>
       </widget>
      </item>
-     <item row="0" column="1">
-      <widget class="QLineEdit" name="nameLineEdit"/>
-     </item>
-     <item row="1" column="0">
-      <widget class="QLabel" name="teamLabel">
+     <item>
+      <widget class="QPushButton" name="finishButton">
        <property name="text">
-        <string>所属队伍：</string>
+        <string>完成比赛</string>
        </property>
       </widget>
      </item>
-     <item row="1" column="1">
-      <widget class="QComboBox" name="teamComboBox"/>
-     </item>
-     <item row="2" column="0">
-      <widget class="QLabel" name="threePointsLabel">
+     <item>
+      <widget class="QPushButton" name="cancelButton">
        <property name="text">
-        <string>三分球数：</string>
+        <string>取消</string>
        </property>
       </widget>
-     </item>
-     <item row="2" column="1">
-      <widget class="QSpinBox" name="threePointsSpinBox"/>
-     </item>
-     <item row="3" column="0">
-      <widget class="QLabel" name="reboundsLabel">
-       <property name="text">
-        <string>篮板数：</string>
-       </property>
-      </widget>
-     </item>
-     <item row="3" column="1">
-      <widget class="QSpinBox" name="reboundsSpinBox"/>
-     </item>
-     <item row="4" column="0">
-      <widget class="QLabel" name="dunksLabel">
-       <property name="text">
-        <string>扣篮数：</string>
-       </property>
-      </widget>
-     </item>
-     <item row="4" column="1">
-      <widget class="QSpinBox" name="dunksSpinBox"/>
-     </item>
-     <item row="5" column="0">
-      <widget class="QLabel" name="stealsLabel">
-       <property name="text">
-        <string>抢断数：</string>
-       </property>
-      </widget>
-     </item>
-     <item row="5" column="1">
-      <widget class="QSpinBox" name="stealsSpinBox"/>
-     </item>
-     <item row="6" column="0">
-      <widget class="QLabel" name="pointsLabel">
-       <property name="text">
-        <string>得分：</string>
-       </property>
-      </widget>
-     </item>
-     <item row="6" column="1">
-      <widget class="QSpinBox" name="pointsSpinBox">
-       <property name="maximum">
-        <number>200</number>
-       </property>
-      </widget>
-     </item>
-     <item row="7" column="0">
-      <widget class="QLabel" name="dateLabel">
-       <property name="text">
-        <string>比赛日期：</string>
-       </property>
-      </widget>
-     </item>
-     <item row="7" column="1">
-      <widget class="QDateEdit" name="dateEdit"/>
      </item>
     </layout>
    </item>
    <item>
-    <widget class="QDialogButtonBox" name="buttonBox">
-     <property name="orientation">
-      <enum>Qt::Horizontal</enum>
-     </property>
-     <property name="standardButtons">
-      <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
+    <widget class="QLabel" name="statusLabel">
+     <property name="alignment">
+      <set>Qt::AlignCenter</set>
      </property>
     </widget>
    </item>
   </layout>
  </widget>
  <resources/>
- <connections>
-  <connection>
-   <sender>buttonBox</sender>
-   <signal>accepted()</signal>
-   <receiver>AddGameStat_Log</receiver>
-   <slot>accept()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>248</x>
-     <y>254</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>157</x>
-     <y>274</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>buttonBox</sender>
-   <signal>rejected()</signal>
-   <receiver>AddGameStat_Log</receiver>
-   <slot>reject()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>316</x>
-     <y>260</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>286</x>
-     <y>274</y>
-    </hint>
-   </hints>
-  </connection>
- </connections>
+ <connections/>
 </ui>
