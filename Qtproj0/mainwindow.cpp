@@ -15,6 +15,24 @@ MainWindow::MainWindow(QWidget *parent)
     , ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+    
+    // 设置统一背景色，解决白色区域问题
+    setStyleSheet("QMainWindow { background-color: #f8fafe; }");
+    ui->centralwidget->setStyleSheet("QWidget#centralwidget { background-color: #f8fafe; }");
+    
+    // 确保标签页内容区域背景一致
+    if (ui->tabWidget) {
+        ui->tabWidget->setStyleSheet("QTabWidget::pane { background-color: #f8fafe; }");
+        
+        // 为每个标签页设置背景
+        for (int i = 0; i < ui->tabWidget->count(); ++i) {
+            QWidget* tabPage = ui->tabWidget->widget(i);
+            if (tabPage) {
+                tabPage->setStyleSheet("QWidget { background-color: #f8fafe; }");
+            }
+        }
+    }
+    
     initializePresetData();  // 初始化预设数据
     
     // 将预设数据传递给数据管理器
