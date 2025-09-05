@@ -5,6 +5,9 @@
 #include "searchtopteam_log.h"
 #include "searchave_log.h"
 #include "playerdatatable.h"
+#include <QFileDialog>
+#include <QDate>
+#include <QFileInfo>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -299,13 +302,28 @@ void MainWindow::on_actionNewGame_triggered()
 
 void MainWindow::on_actionSave_triggered()
 {
-    QString gamePath = QDir(QDir::current()).filePath("data/" + GAME_STATS_FILE);
-    QString summaryPath = QDir(QDir::current()).filePath("data/" + SUMMARY_STATS_FILE);
+    QString fileName = QFileDialog::getSaveFileName(this,
+        tr("保存数据文件"), 
+        QString("basketball_data_%1.dat").arg(QDate::currentDate().toString("yyyyMMdd")),
+        tr("数据文件 (*.dat);;所有文件 (*.*)"));
+        
+    if (fileName.isEmpty()) {
+        return; // 用户取消了保存
+    }
+    
+    // 为游戏统计和汇总统计生成对应的文件名
+    QString baseFileName = fileName;
+    if (baseFileName.endsWith(".dat")) {
+        baseFileName.chop(4); // 移除 ".dat"
+    }
+    
+    QString gamePath = baseFileName + "_games.dat";
+    QString summaryPath = baseFileName + "_summary.dat";
     
     if (m_dataManager->saveGameStats(gamePath) &&
         m_dataManager->saveSummaryStats(summaryPath)) {
         QMessageBox::information(this, tr("保存成功"),
-                               tr("数据已成功保存到文件。"));
+                               tr("数据已成功保存到文件：\n%1\n%2").arg(gamePath).arg(summaryPath));
     } else {
         QMessageBox::warning(this, tr("保存失败"),
                            tr("保存数据时发生错误。"));
@@ -314,14 +332,73 @@ void MainWindow::on_actionSave_triggered()
 
 void MainWindow::on_actionLoad_triggered()
 {
-    QString gamePath = QDir(QDir::current()).filePath("data/" + GAME_STATS_FILE);
-    QString summaryPath = QDir(QDir::current()).filePath("data/" + SUMMARY_STATS_FILE);
+    QString fileName = QFileDialog::getOpenFileName(this,
+        tr("加载数据文件"), 
+        "",
+        tr("数据文件 (*.dat);;所有文件 (*.*)"));
+        
+    if (fileName.isEmpty()) {
+        return; // 用户取消了加载
+    }
+    
+    // 智能判断文件类型并确定对应的文件名
+    QString baseFileName = fileName;
+    QString gamePath, summaryPath;
+    
+    if (fileName.endsWith("_games.dat")) {
+        // 用户选择的是游戏统计文件
+        baseFileName = fileName;
+        baseFileName.chop(10); // 移除 "_games.dat"
+        gamePath = baseFileName + "_games.dat";
+        summaryPath = baseFileName + "_summary.dat";
+    } else if (fileName.endsWith("_summary.dat")) {
+        // 用户选择的是汇总统计文件
+        baseFileName = fileName;
+        baseFileName.chop(12); // 移除 "_summary.dat"
+        gamePath = baseFileName + "_games.dat";
+        summaryPath = baseFileName + "_summary.dat";
+    } else {
+        // 用户选择的是其他文件，按原来的逻辑处理
+        if (baseFileName.endsWith(".dat")) {
+            baseFileName.chop(4); // 移除 ".dat"
+        }
+        gamePath = baseFileName + "_games.dat";
+        summaryPath = baseFileName + "_summary.dat";
+    }
+    
+    // 检查文件是否存在
+    QFileInfo gameFileInfo(gamePath);
+    QFileInfo summaryFileInfo(summaryPath);
+    
+    if (!gameFileInfo.exists()) {
+        QString debugInfo = QString("文件路径：%1\n文件夹：%2\n文件名：%3\n绝对路径：%4")
+            .arg(gamePath)
+            .arg(gameFileInfo.dir().absolutePath())
+            .arg(gameFileInfo.fileName())
+            .arg(gameFileInfo.absoluteFilePath());
+            
+        QMessageBox::warning(this, tr("文件不存在"),
+                           tr("游戏统计文件不存在。\n\n调试信息：\n%1\n\n请确保选择正确的数据文件。").arg(debugInfo));
+        return;
+    }
+    
+    if (!summaryFileInfo.exists()) {
+        QString debugInfo = QString("文件路径：%1\n文件夹：%2\n文件名：%3\n绝对路径：%4")
+            .arg(summaryPath)
+            .arg(summaryFileInfo.dir().absolutePath())
+            .arg(summaryFileInfo.fileName())
+            .arg(summaryFileInfo.absoluteFilePath());
+            
+        QMessageBox::warning(this, tr("文件不存在"),
+                           tr("汇总统计文件不存在。\n\n调试信息：\n%1\n\n请确保选择正确的数据文件。").arg(debugInfo));
+        return;
+    }
     
     if (m_dataManager->loadGameStats(gamePath) &&
         m_dataManager->loadSummaryStats(summaryPath)) {
         updateDisplay();
         QMessageBox::information(this, tr("加载成功"),
-                               tr("数据已成功从文件加载。"));
+                               tr("数据已成功从文件加载：\n%1\n%2").arg(gamePath).arg(summaryPath));
     } else {
         QMessageBox::warning(this, tr("加载失败"),
                            tr("加载数据时发生错误。"));
@@ -335,14 +412,16 @@ void MainWindow::on_actionShowSummary_triggered()
 
 void MainWindow::on_actionTopThree_triggered()
 {
-    SearchAve_Log dialog(m_dataManager, this);
-    dialog.exec();
+    SearchAve_Log* dialog = new SearchAve_Log(m_dataManager, this);
+    dialog->setAttribute(Qt::WA_DeleteOnClose);
+    dialog->show();
 }
 
 void MainWindow::on_actionTeamTopThree_triggered()
 {
-    SearchTopteam_Log dialog(m_dataManager, this);
-    dialog.exec();
+    SearchTopteam_Log* dialog = new SearchTopteam_Log(m_dataManager, this);
+    dialog->setAttribute(Qt::WA_DeleteOnClose);
+    dialog->show();
 }
 
 void MainWindow::initializePresetData()
