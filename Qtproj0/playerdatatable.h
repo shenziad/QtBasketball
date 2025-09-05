@@ -30,13 +30,18 @@ public:
     // 添加一场比赛记录
     void addGameRecord(const QDate& date, const QString& team,
                       int points, int threePoints, int rebounds,
-                      int dunks, int steals);
+                      int dunks, int steals, int gameId = 0);
     // 计算并显示平均数据
     void calculateAndShowAverages();
+    
+    // 设置数据管理器（用于删除功能）
+    void setDataManager(class DataManage* dataManager);
 
 private slots:
     // 导出数据到文件
     void exportToFile();
+    // 删除选中的记录
+    void deleteSelectedRecord();
 
 private:
     // 初始化UI布局
@@ -52,7 +57,9 @@ private:
     QTableWidget* m_tableWidget; // 数据表格
     QLabel* m_titleLabel;        // 标题标签
     QPushButton* m_exportButton; // 导出按钮
+    QPushButton* m_deleteButton; // 删除按钮
     QLabel* m_averagesLabel;     // 平均值显示标签
+    class DataManage* m_dataManager; // 数据管理器
 };
 
 #endif // PLAYERDATATABLE_H

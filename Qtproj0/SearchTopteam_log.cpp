@@ -9,6 +9,10 @@ SearchTopteam_Log::SearchTopteam_Log(DataManage* dataManager, QWidget *parent)
     ui->setupUi(this);
     setupUI();
     setWindowTitle(tr("查询队内排名"));
+    
+    // 连接信号槽
+    connect(ui->teamComboBox, QOverload<const QString &>::of(&QComboBox::currentTextChanged),
+            this, &SearchTopteam_Log::on_teamComboBox_currentIndexChanged);
 }
 
 SearchTopteam_Log::~SearchTopteam_Log()

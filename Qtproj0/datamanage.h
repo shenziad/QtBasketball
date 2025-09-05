@@ -45,6 +45,12 @@ public:
     // 批量添加同一场比赛的数据
     bool addGameStats(const QVector<PlayerStats>& stats);
 
+    // 删除球员所有数据
+    bool deletePlayerAllStats(const QString& playerName);
+    
+    // 删除单条比赛数据
+    bool deleteGameStat(int gameId, const QString& playerName);
+
 private:
     QVector<PlayerStats> m_gameStats;          // 所有比赛数据
     QMap<QString, PlayerStatsSummary> m_summaryStats;  // 汇总数据，按球员名字索引

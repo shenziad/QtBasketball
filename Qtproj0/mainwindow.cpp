@@ -153,11 +153,12 @@ void MainWindow::setupConnections()
 void MainWindow::initializeTables()
 {
     // 设置汇总表格的列
-    ui->summaryTableWidget->setColumnCount(10);  // 增加一列用于查看按钮
+    ui->summaryTableWidget->setColumnCount(11);  // 增加删除按钮列
     ui->summaryTableWidget->setHorizontalHeaderLabels(QStringList()
         << tr("姓名") << tr("队伍") << tr("场次")
         << tr("总得分") << tr("总三分") << tr("总篮板")
-        << tr("总扣篮") << tr("总抢断") << tr("场均得分") << tr("操作"));
+        << tr("总扣篮") << tr("总抢断") << tr("场均得分") 
+        << tr("查看详情") << tr("删除数据"));
         
     // 设置比赛记录表格的列
     ui->gamesTableWidget->setColumnCount(9);
@@ -182,13 +183,19 @@ void MainWindow::initializeTables()
         table->horizontalHeader()->setSectionResizeMode(1, QHeaderView::ResizeToContents);
         
         // 数据列固定宽度
-        for (int i = 2; i < table->columnCount() - 1; ++i) {
-            table->setColumnWidth(i, 70);  // 稍微加宽，确保数字显示完整
+        for (int i = 2; i < table->columnCount() - 2; ++i) {  // 修改这里，留出两列给按钮
+            table->setColumnWidth(i, 70);
         }
         
-        // 最后一列自适应
-        table->horizontalHeader()->setSectionResizeMode(
-            table->columnCount() - 1, QHeaderView::Stretch);
+        // 最后两列（按钮列）固定宽度
+        if (table == ui->summaryTableWidget) {
+            table->setColumnWidth(table->columnCount() - 2, 80);  // 查看详情按钮
+            table->setColumnWidth(table->columnCount() - 1, 80);  // 删除按钮
+        } else {
+            // 最后一列自适应
+            table->horizontalHeader()->setSectionResizeMode(
+                table->columnCount() - 1, QHeaderView::Stretch);
+        }
     }
     
     // 设置提示信息
@@ -227,6 +234,28 @@ void MainWindow::updateDisplay()
             showPlayerDetailedStats(name);
         });
         ui->summaryTableWidget->setCellWidget(i, col++, detailsButton);
+        
+        // 添加删除数据按钮
+        QPushButton* deleteButton = new QPushButton(tr("删除数据"));
+        deleteButton->setStyleSheet("QPushButton { background-color: #ff6b6b; color: white; }");
+        deleteButton->setProperty("playerName", summary.name);
+        connect(deleteButton, &QPushButton::clicked, this, [this, name = summary.name]() {
+            int ret = QMessageBox::warning(this, tr("确认删除"),
+                tr("确定要删除球员 %1 的所有数据吗？此操作不可恢复！").arg(name),
+                QMessageBox::Yes | QMessageBox::No);
+            
+            if (ret == QMessageBox::Yes) {
+                if (m_dataManager->deletePlayerAllStats(name)) {
+                    QMessageBox::information(this, tr("删除成功"),
+                        tr("已成功删除球员 %1 的所有数据").arg(name));
+                    updateDisplay();
+                } else {
+                    QMessageBox::warning(this, tr("删除失败"),
+                        tr("删除球员数据时发生错误"));
+                }
+            }
+        });
+        ui->summaryTableWidget->setCellWidget(i, col++, deleteButton);
     }
     ui->summaryTableWidget->resizeColumnsToContents();
     
@@ -375,6 +404,13 @@ void MainWindow::showPlayerDetailedStats(const QString& playerName)
     PlayerDataTable* detailWindow = new PlayerDataTable(playerName, this);
     detailWindow->setAttribute(Qt::WA_DeleteOnClose);
     
+    // 设置数据管理器
+    detailWindow->setDataManager(m_dataManager);
+    
+    // 连接数据变化信号
+    connect(detailWindow, &PlayerDataTable::dataChanged,
+            this, &MainWindow::updateDisplay);
+    
     // 设置表格数据
     for (const auto& game : playerGames) {
         detailWindow->addGameRecord(
@@ -384,7 +420,8 @@ void MainWindow::showPlayerDetailedStats(const QString& playerName)
             game.getThreePoints(),
             game.getRebounds(),
             game.getDunks(),
-            game.getSteals()
+            game.getSteals(),
+            game.getGameId()
         );
     }
     
@@ -392,6 +429,6 @@ void MainWindow::showPlayerDetailedStats(const QString& playerName)
     detailWindow->calculateAndShowAverages();
     
     // 显示窗口
-    detailWindow->resize(800, 500);
+    detailWindow->resize(900, 600);  // 增加宽度以容纳新列
     detailWindow->show();
 }

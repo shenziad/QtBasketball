@@ -1,5 +1,7 @@
 #include "playerdatatable.h"
+#include "datamanage.h"
 #include <QVBoxLayout>
+#include <QHBoxLayout>
 #include <QTableWidget>
 #include <QHeaderView>
 #include <QLabel>
@@ -16,7 +18,9 @@ PlayerDataTable::PlayerDataTable(const QString& playerName, QWidget* parent)
     , m_tableWidget(nullptr)
     , m_titleLabel(nullptr)
     , m_exportButton(nullptr)
+    , m_deleteButton(nullptr)
     , m_averagesLabel(nullptr)
+    , m_dataManager(nullptr)
 {
     setupUI();
     initializeTable();
@@ -53,11 +57,17 @@ void PlayerDataTable::setupUI()
     m_exportButton = new QPushButton(tr("导出到文件"), this);
     connect(m_exportButton, &QPushButton::clicked, this, &PlayerDataTable::exportToFile);
     
+    // 删除按钮
+    m_deleteButton = new QPushButton(tr("删除选中记录"), this);
+    m_deleteButton->setStyleSheet("QPushButton { background-color: #ff6b6b; color: white; }");
+    connect(m_deleteButton, &QPushButton::clicked, this, &PlayerDataTable::deleteSelectedRecord);
+    
     // 返回按钮
     QPushButton* returnButton = new QPushButton(tr("返回主界面"), this);
     connect(returnButton, &QPushButton::clicked, this, &QWidget::close);
     
     buttonLayout->addWidget(m_exportButton);
+    buttonLayout->addWidget(m_deleteButton);
     buttonLayout->addWidget(returnButton);
     
     mainLayout->addWidget(m_titleLabel);
@@ -73,7 +83,7 @@ void PlayerDataTable::initializeTable()
 {
     QStringList headers;
     headers << tr("日期") << tr("球队") << tr("得分") << tr("三分")
-            << tr("篮板") << tr("扣篮") << tr("抢断");
+            << tr("篮板") << tr("扣篮") << tr("抢断") << tr("比赛ID");
     
     m_tableWidget->setColumnCount(headers.size());
     m_tableWidget->setHorizontalHeaderLabels(headers);
@@ -103,7 +113,7 @@ QTableWidgetItem* PlayerDataTable::createReadOnlyItem(const QString& text) const
 
 void PlayerDataTable::addGameRecord(const QDate& date, const QString& team,
                                   int points, int threePoints, int rebounds,
-                                  int dunks, int steals)
+                                  int dunks, int steals, int gameId)
 {
     int row = m_tableWidget->rowCount();
     m_tableWidget->insertRow(row);
@@ -116,6 +126,7 @@ void PlayerDataTable::addGameRecord(const QDate& date, const QString& team,
     m_tableWidget->setItem(row, col++, createReadOnlyItem(QString::number(rebounds)));
     m_tableWidget->setItem(row, col++, createReadOnlyItem(QString::number(dunks)));
     m_tableWidget->setItem(row, col++, createReadOnlyItem(QString::number(steals)));
+    m_tableWidget->setItem(row, col++, createReadOnlyItem(QString::number(gameId)));
 }
 
 void PlayerDataTable::calculateAndShowAverages()
@@ -200,4 +211,57 @@ void PlayerDataTable::exportToFile()
     
     QMessageBox::information(this, tr("导出成功"),
         tr("数据已成功导出到文件：%1").arg(fileName));
+}
+
+void PlayerDataTable::setDataManager(DataManage* dataManager)
+{
+    m_dataManager = dataManager;
+}
+
+void PlayerDataTable::deleteSelectedRecord()
+{
+    int currentRow = m_tableWidget->currentRow();
+    if (currentRow < 0) {
+        QMessageBox::information(this, tr("提示"), tr("请先选择要删除的记录"));
+        return;
+    }
+    
+    if (!m_dataManager) {
+        QMessageBox::warning(this, tr("错误"), tr("数据管理器未设置"));
+        return;
+    }
+    
+    // 获取比赛ID
+    QTableWidgetItem* gameIdItem = m_tableWidget->item(currentRow, 7); // 比赛ID在第7列
+    if (!gameIdItem) {
+        QMessageBox::warning(this, tr("错误"), tr("无法获取比赛ID"));
+        return;
+    }
+    
+    int gameId = gameIdItem->text().toInt();
+    QString date = m_tableWidget->item(currentRow, 0)->text();
+    
+    int ret = QMessageBox::warning(this, tr("确认删除"),
+        tr("确定要删除 %1 在 %2 的比赛记录吗？此操作不可恢复！")
+        .arg(m_playerName).arg(date),
+        QMessageBox::Yes | QMessageBox::No);
+    
+    if (ret == QMessageBox::Yes) {
+        if (m_dataManager->deleteGameStat(gameId, m_playerName)) {
+            // 从表格中删除该行
+            m_tableWidget->removeRow(currentRow);
+            
+            // 重新计算平均值
+            calculateAndShowAverages();
+            
+            // 发出数据变化信号
+            emit dataChanged();
+            
+            QMessageBox::information(this, tr("删除成功"),
+                tr("已成功删除该场比赛记录"));
+        } else {
+            QMessageBox::warning(this, tr("删除失败"),
+                tr("删除比赛记录时发生错误"));
+        }
+    }
 }

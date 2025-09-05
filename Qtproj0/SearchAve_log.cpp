@@ -10,6 +10,10 @@ SearchAve_Log::SearchAve_Log(DataManage* dataManager, QWidget *parent)
     ui->setupUi(this);
     setupUI();
     setWindowTitle(tr("查询平均数据排名"));
+    
+    // 连接信号槽
+    connect(ui->categoryComboBox, QOverload<const QString &>::of(&QComboBox::currentTextChanged),
+            this, &SearchAve_Log::on_categoryComboBox_currentIndexChanged);
 }
 
 SearchAve_Log::~SearchAve_Log()

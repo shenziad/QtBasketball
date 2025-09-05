@@ -238,3 +238,68 @@ QStringList DataManage::getAllTeams() const
     }
     return teams;
 }
+
+bool DataManage::deletePlayerAllStats(const QString& playerName)
+{
+    if (playerName.isEmpty()) {
+        return false;
+    }
+    
+    // 从游戏统计中删除该球员的所有数据
+    auto it = m_gameStats.begin();
+    while (it != m_gameStats.end()) {
+        if (it->getName() == playerName) {
+            it = m_gameStats.erase(it);
+        } else {
+            ++it;
+        }
+    }
+    
+    // 从汇总统计中删除该球员
+    m_summaryStats.remove(playerName);
+    
+    // 发出数据变化信号
+    emit dataChanged();
+    
+    return true;
+}
+
+bool DataManage::deleteGameStat(int gameId, const QString& playerName)
+{
+    if (playerName.isEmpty()) {
+        return false;
+    }
+    
+    // 查找并删除指定的比赛记录
+    bool found = false;
+    for (int i = 0; i < m_gameStats.size(); ++i) {
+        const PlayerStats& stats = m_gameStats[i];
+        if (stats.getGameId() == gameId && stats.getName() == playerName) {
+            m_gameStats.removeAt(i);
+            found = true;
+            break;
+        }
+    }
+    
+    if (!found) {
+        return false;
+    }
+    
+    // 重新计算该球员的汇总数据
+    m_summaryStats.remove(playerName);
+    for (const PlayerStats& stats : m_gameStats) {
+        if (stats.getName() == playerName) {
+            updateSummaryStats(stats);
+        }
+    }
+    
+    // 如果该球员没有任何比赛记录了，从汇总中完全删除
+    if (!m_summaryStats.contains(playerName)) {
+        // 这种情况下不需要特别处理，已经被删除了
+    }
+    
+    // 发出数据变化信号
+    emit dataChanged();
+    
+    return true;
+}
