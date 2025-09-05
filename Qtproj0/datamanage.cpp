@@ -231,12 +231,42 @@ QVector<PlayerStatsSummary> DataManage::getTopThreeInTeam(const QString& team) c
 QStringList DataManage::getAllTeams() const
 {
     QStringList teams;
+    
+    // 首先添加预设球队
+    for (const QString& team : m_presetTeams) {
+        if (!teams.contains(team)) {
+            teams.append(team);
+        }
+    }
+    
+    // 然后添加从实际数据中获取的球队
     for (const auto& summary : m_summaryStats) {
         if (!teams.contains(summary.team)) {
             teams.append(summary.team);
         }
     }
+    
     return teams;
+}
+
+QStringList DataManage::getAllPlayerNames() const
+{
+    QStringList playerNames;
+    
+    // 从汇总数据中获取所有球员名称
+    for (auto it = m_summaryStats.begin(); it != m_summaryStats.end(); ++it) {
+        playerNames.append(it.key());
+    }
+    
+    // 添加预设球员
+    for (const auto& presetPlayer : m_presetPlayers) {
+        if (!playerNames.contains(presetPlayer.first)) {
+            playerNames.append(presetPlayer.first);
+        }
+    }
+    
+    playerNames.sort();
+    return playerNames;
 }
 
 bool DataManage::deletePlayerAllStats(const QString& playerName)
@@ -302,4 +332,14 @@ bool DataManage::deleteGameStat(int gameId, const QString& playerName)
     emit dataChanged();
     
     return true;
+}
+
+void DataManage::setPresetTeams(const QStringList& teams)
+{
+    m_presetTeams = teams;
+}
+
+void DataManage::setPresetPlayers(const QVector<QPair<QString, QString>>& players)
+{
+    m_presetPlayers = players;
 }

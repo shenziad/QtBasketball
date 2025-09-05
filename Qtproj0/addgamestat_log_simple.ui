@@ -23,13 +23,13 @@
       <item>
        <widget class="QGroupBox" name="gameInfoGroup">
         <property name="title">
-         <string>比赛信息</string>
+         <string>比赛基本信息</string>
         </property>
         <layout class="QFormLayout" name="gameInfoLayout">
          <item row="0" column="0">
           <widget class="QLabel" name="gameNameLabel">
            <property name="text">
-            <string>比赛名称:</string>
+            <string>比赛名称：</string>
            </property>
           </widget>
          </item>
@@ -39,7 +39,7 @@
          <item row="1" column="0">
           <widget class="QLabel" name="dateLabel">
            <property name="text">
-            <string>比赛日期:</string>
+            <string>比赛日期：</string>
            </property>
           </widget>
          </item>
@@ -58,7 +58,7 @@
          <item row="0" column="0">
           <widget class="QLabel" name="nameLabel">
            <property name="text">
-            <string>球员姓名:</string>
+            <string>球员姓名：</string>
            </property>
           </widget>
          </item>
@@ -68,7 +68,7 @@
          <item row="1" column="0">
           <widget class="QLabel" name="teamLabel">
            <property name="text">
-            <string>队伍:</string>
+            <string>所属队伍：</string>
            </property>
           </widget>
          </item>
@@ -78,7 +78,7 @@
          <item row="2" column="0">
           <widget class="QLabel" name="pointsLabel">
            <property name="text">
-            <string>得分:</string>
+            <string>得分：</string>
            </property>
           </widget>
          </item>
@@ -92,7 +92,7 @@
          <item row="3" column="0">
           <widget class="QLabel" name="threePointsLabel">
            <property name="text">
-            <string>三分球:</string>
+            <string>三分球数：</string>
            </property>
           </widget>
          </item>
@@ -102,7 +102,7 @@
          <item row="4" column="0">
           <widget class="QLabel" name="reboundsLabel">
            <property name="text">
-            <string>篮板:</string>
+            <string>篮板数：</string>
            </property>
           </widget>
          </item>
@@ -112,7 +112,7 @@
          <item row="5" column="0">
           <widget class="QLabel" name="dunksLabel">
            <property name="text">
-            <string>扣篮:</string>
+            <string>扣篮数：</string>
            </property>
           </widget>
          </item>
@@ -122,7 +122,7 @@
          <item row="6" column="0">
           <widget class="QLabel" name="stealsLabel">
            <property name="text">
-            <string>抢断:</string>
+            <string>抢断数：</string>
            </property>
           </widget>
          </item>
@@ -134,13 +134,6 @@
       </item>
       <item>
        <layout class="QVBoxLayout" name="buttonLayout">
-        <item>
-         <widget class="QPushButton" name="selectPresetButton">
-          <property name="text">
-           <string>选择预设球员</string>
-          </property>
-         </widget>
-        </item>
         <item>
          <widget class="QPushButton" name="addPlayerButton">
           <property name="text">
@@ -197,7 +190,7 @@
       <item>
        <widget class="QLabel" name="tableTitle">
         <property name="text">
-         <string>本场比赛球员</string>
+         <string>本场比赛球员列表</string>
         </property>
         <property name="alignment">
          <set>Qt::AlignCenter</set>

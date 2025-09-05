@@ -3,7 +3,9 @@
 
 #include <QtCore>
 #include <QtWidgets>
+#include <QCompleter>
 #include "datamanage.h"
+#include "playerselectdialog.h"
 
 namespace Ui {
 class AddGameStat_Log;
@@ -19,18 +21,15 @@ public:
 
 private slots:
     void addPlayer();             // 添加当前球员数据
-    void finishGame();            // 完成本场比赛
-    void cancelGame();            // 取消添加
-    void clearPlayerInputs();     // 清空球员输入框
+    void saveGameData();          // 保存比赛数据
+    void clearInputs();           // 清空输入框
+    void selectPresetPlayers();   // 选择预设球员
 
 private:
     Ui::AddGameStat_Log *ui;
     DataManage* m_dataManager;
     int m_currentGameId;                // 当前比赛ID
-    QVector<PlayerStats> m_gameStats;   // 存储本场比赛所有球员数据
     
-    bool validateInput();               // 验证球员数据输入
-    bool validateGameInfo();            // 验证比赛基本信息
     void setupUI();                     // 设置界面
     void setupConnections();            // 设置信号连接
 };

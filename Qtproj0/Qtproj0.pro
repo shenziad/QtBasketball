@@ -16,7 +16,8 @@ SOURCES += \
     main.cpp \
     mainwindow.cpp \
     playerdatatable.cpp \
-    playerstats.cpp
+    playerstats.cpp \
+    playerselectdialog.cpp
 
 
 HEADERS += \
@@ -26,7 +27,8 @@ HEADERS += \
     datamanage.h \
     mainwindow.h \
     playerdatatable.h \
-    playerstats.h
+    playerstats.h \
+    playerselectdialog.h
 
 FORMS += \
     mainwindow.ui \

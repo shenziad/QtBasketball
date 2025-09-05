@@ -29,6 +29,7 @@ public:
     QVector<PlayerStatsSummary> getTopThreeByAverage(const QString& category) const;
     QVector<PlayerStatsSummary> getTopThreeInTeam(const QString& team) const;
     QStringList getAllTeams() const;
+    QStringList getAllPlayerNames() const;
 
     // 数据验证
     bool isPlayerExists(const QString& name) const { return m_summaryStats.contains(name); }
@@ -50,10 +51,18 @@ public:
     
     // 删除单条比赛数据
     bool deleteGameStat(int gameId, const QString& playerName);
+    
+    // 设置预设球队
+    void setPresetTeams(const QStringList& teams);
+    
+    // 获取预设球员列表（球员名，球队）
+    void setPresetPlayers(const QVector<QPair<QString, QString>>& players);
 
 private:
     QVector<PlayerStats> m_gameStats;          // 所有比赛数据
     QMap<QString, PlayerStatsSummary> m_summaryStats;  // 汇总数据，按球员名字索引
+    QStringList m_presetTeams;                 // 预设球队列表
+    QVector<QPair<QString, QString>> m_presetPlayers; // 预设球员列表（姓名，球队）
 
     void updateSummaryStats(const PlayerStats& stats);
     static bool compareByCategory(const PlayerStatsSummary& a, 
