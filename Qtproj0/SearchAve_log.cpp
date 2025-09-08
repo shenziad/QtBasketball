@@ -44,7 +44,7 @@ void SearchAve_Log::setupUI()
     updateResults();
 }
 
-QString SearchAve_Log::getCategoryCode(const QString& displayName) const
+QString SearchAve_Log::getCategoryCode(const QString& /* displayName */) const
 {
     return ui->categoryComboBox->currentData().toString();
 }

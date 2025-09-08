@@ -149,7 +149,7 @@ void MainWindow::setupConnections()
     connect(ui->summaryTableWidget, &QTableWidget::itemDoubleClicked,
             [this](QTableWidgetItem* item) {
                 int row = item->row();
-                QString playerName = ui->summaryTableWidget->item(row, 0)->text();
+                QString playerName = ui->summaryTableWidget->item(row, 1)->text();  // 姓名在第1列（原来第0列）
                 showPlayerDetailedStats(playerName);
             });
             
@@ -167,14 +167,14 @@ void MainWindow::setupConnections()
                                     "篮板：%6\n"
                                     "扣篮：%7\n"
                                     "抢断：%8")
-                    .arg(ui->gamesTableWidget->item(row, 0)->text())
-                    .arg(ui->gamesTableWidget->item(row, 1)->text())
-                    .arg(ui->gamesTableWidget->item(row, 2)->text())
-                    .arg(ui->gamesTableWidget->item(row, 3)->text())
-                    .arg(ui->gamesTableWidget->item(row, 4)->text())
-                    .arg(ui->gamesTableWidget->item(row, 5)->text())
-                    .arg(ui->gamesTableWidget->item(row, 6)->text())
-                    .arg(ui->gamesTableWidget->item(row, 7)->text());
+                    .arg(ui->gamesTableWidget->item(row, 1)->text())  // 日期在第1列（原来第0列）
+                    .arg(ui->gamesTableWidget->item(row, 2)->text())  // 姓名在第2列（原来第1列）
+                    .arg(ui->gamesTableWidget->item(row, 3)->text())  // 队伍在第3列（原来第2列）
+                    .arg(ui->gamesTableWidget->item(row, 4)->text())  // 得分在第4列（原来第3列）
+                    .arg(ui->gamesTableWidget->item(row, 5)->text())  // 三分在第5列（原来第4列）
+                    .arg(ui->gamesTableWidget->item(row, 6)->text())  // 篮板在第6列（原来第5列）
+                    .arg(ui->gamesTableWidget->item(row, 7)->text())  // 扣篮在第7列（原来第6列）
+                    .arg(ui->gamesTableWidget->item(row, 8)->text()); // 抢断在第8列（原来第7列）
                     
                 QMessageBox::information(this, tr("比赛信息"), info);
             });
@@ -182,18 +182,18 @@ void MainWindow::setupConnections()
 
 void MainWindow::initializeTables()
 {
-    // 设置汇总表格的列
-    ui->summaryTableWidget->setColumnCount(11);  // 增加删除按钮列
+    // 设置汇总表格的列，添加头像列
+    ui->summaryTableWidget->setColumnCount(12);  // 增加头像列，现在是12列
     ui->summaryTableWidget->setHorizontalHeaderLabels(QStringList()
-        << tr("姓名") << tr("队伍") << tr("场次")
+        << tr("头像") << tr("姓名") << tr("队伍") << tr("场次")
         << tr("总得分") << tr("总三分") << tr("总篮板")
         << tr("总扣篮") << tr("总抢断") << tr("场均得分") 
         << tr("查看详情") << tr("删除数据"));
         
-    // 设置比赛记录表格的列
-    ui->gamesTableWidget->setColumnCount(9);
+    // 设置比赛记录表格的列，添加头像列
+    ui->gamesTableWidget->setColumnCount(10);  // 增加头像列，现在是10列
     ui->gamesTableWidget->setHorizontalHeaderLabels(QStringList()
-        << tr("日期") << tr("姓名") << tr("队伍")
+        << tr("头像") << tr("日期") << tr("姓名") << tr("队伍")
         << tr("得分") << tr("三分") << tr("篮板")
         << tr("扣篮") << tr("抢断") << tr("比赛ID"));
         
@@ -208,24 +208,40 @@ void MainWindow::initializeTables()
             table->horizontalHeader()->setSectionResizeMode(i, QHeaderView::Fixed);
         }
         
-        // 姓名/日期列和队伍/姓名列自适应内容
-        table->horizontalHeader()->setSectionResizeMode(0, QHeaderView::ResizeToContents);
-        table->horizontalHeader()->setSectionResizeMode(1, QHeaderView::ResizeToContents);
+        // 头像列固定宽度
+        table->setColumnWidth(0, 60);
         
-        // 数据列固定宽度
-        for (int i = 2; i < table->columnCount() - 2; ++i) {  // 修改这里，留出两列给按钮
-            table->setColumnWidth(i, 70);
-        }
-        
-        // 最后两列（按钮列）固定宽度
         if (table == ui->summaryTableWidget) {
+            // 汇总表格：姓名和队伍列自适应内容
+            table->horizontalHeader()->setSectionResizeMode(1, QHeaderView::ResizeToContents);
+            table->horizontalHeader()->setSectionResizeMode(2, QHeaderView::ResizeToContents);
+            
+            // 数据列固定宽度
+            for (int i = 3; i < table->columnCount() - 2; ++i) {
+                table->setColumnWidth(i, 70);
+            }
+            
+            // 最后两列（按钮列）固定宽度
             table->setColumnWidth(table->columnCount() - 2, 80);  // 查看详情按钮
             table->setColumnWidth(table->columnCount() - 1, 80);  // 删除按钮
         } else {
+            // 比赛记录表格：日期、姓名和队伍列自适应内容
+            table->horizontalHeader()->setSectionResizeMode(1, QHeaderView::ResizeToContents);
+            table->horizontalHeader()->setSectionResizeMode(2, QHeaderView::ResizeToContents);
+            table->horizontalHeader()->setSectionResizeMode(3, QHeaderView::ResizeToContents);
+            
+            // 数据列固定宽度
+            for (int i = 4; i < table->columnCount() - 1; ++i) {
+                table->setColumnWidth(i, 70);
+            }
+            
             // 最后一列自适应
             table->horizontalHeader()->setSectionResizeMode(
                 table->columnCount() - 1, QHeaderView::Stretch);
         }
+        
+        // 设置行高以容纳头像
+        table->verticalHeader()->setDefaultSectionSize(64);
     }
     
     // 设置提示信息
@@ -242,6 +258,15 @@ void MainWindow::updateDisplay()
     for (int i = 0; i < summaries.size(); ++i) {
         const PlayerStatsSummary& summary = summaries[i];
         int col = 0;
+        
+        // 添加头像
+        QLabel* avatarLabel = new QLabel();
+        QPixmap avatar = AvatarGenerator::generateAvatar(summary.name, 48, AvatarGenerator::Initials);
+        avatarLabel->setPixmap(avatar);
+        avatarLabel->setAlignment(Qt::AlignCenter);
+        avatarLabel->setScaledContents(true);
+        avatarLabel->setFixedSize(48, 48);
+        ui->summaryTableWidget->setCellWidget(i, col++, avatarLabel);
         
         ui->summaryTableWidget->setItem(i, col++, createReadOnlyItem(summary.name));
         ui->summaryTableWidget->setItem(i, col++, createReadOnlyItem(summary.team));
@@ -296,6 +321,15 @@ void MainWindow::updateDisplay()
     for (int i = 0; i < games.size(); ++i) {
         const PlayerStats& game = games[i];
         int col = 0;
+        
+        // 添加头像
+        QLabel* avatarLabel = new QLabel();
+        QPixmap avatar = AvatarGenerator::generateAvatar(game.getName(), 48, AvatarGenerator::Initials);
+        avatarLabel->setPixmap(avatar);
+        avatarLabel->setAlignment(Qt::AlignCenter);
+        avatarLabel->setScaledContents(true);
+        avatarLabel->setFixedSize(48, 48);
+        ui->gamesTableWidget->setCellWidget(i, col++, avatarLabel);
         
         ui->gamesTableWidget->setItem(i, col++, createReadOnlyItem(game.getDate().toString("yyyy-MM-dd")));
         ui->gamesTableWidget->setItem(i, col++, createReadOnlyItem(game.getName()));

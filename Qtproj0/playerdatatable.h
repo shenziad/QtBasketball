@@ -4,6 +4,7 @@
 #include <QtWidgets/QWidget>
 #include <QtCore/QString>
 #include <QtCore/QDate>
+#include "avatargenerator.h"
 
 QT_BEGIN_NAMESPACE
 class QTableWidget;

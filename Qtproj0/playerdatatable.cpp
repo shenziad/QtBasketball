@@ -35,13 +35,27 @@ void PlayerDataTable::setupUI()
 {
     QVBoxLayout* mainLayout = new QVBoxLayout(this);
     
+    // 创建顶部区域：头像 + 标题
+    QHBoxLayout* topLayout = new QHBoxLayout;
+    
+    // 创建球员头像
+    QLabel* avatarLabel = new QLabel(this);
+    QPixmap avatar = AvatarGenerator::generateAvatar(m_playerName, 80, AvatarGenerator::Initials);
+    avatarLabel->setPixmap(avatar);
+    avatarLabel->setFixedSize(80, 80);
+    avatarLabel->setScaledContents(true);
+    
     // 标题
     m_titleLabel = new QLabel(tr("%1 的技术统计表").arg(m_playerName), this);
     QFont titleFont = m_titleLabel->font();
     titleFont.setPointSize(14);
     titleFont.setBold(true);
     m_titleLabel->setFont(titleFont);
-    m_titleLabel->setAlignment(Qt::AlignCenter);
+    m_titleLabel->setAlignment(Qt::AlignLeft | Qt::AlignVCenter);
+    
+    topLayout->addWidget(avatarLabel);
+    topLayout->addWidget(m_titleLabel, 1);  // 让标题占据剩余空间
+    topLayout->addStretch();
     
     // 表格
     m_tableWidget = new QTableWidget(this);
@@ -70,7 +84,7 @@ void PlayerDataTable::setupUI()
     buttonLayout->addWidget(m_deleteButton);
     buttonLayout->addWidget(returnButton);
     
-    mainLayout->addWidget(m_titleLabel);
+    mainLayout->addLayout(topLayout);
     mainLayout->addWidget(m_tableWidget);
     mainLayout->addWidget(m_averagesLabel);
     mainLayout->addLayout(buttonLayout);
@@ -231,8 +245,8 @@ void PlayerDataTable::deleteSelectedRecord()
         return;
     }
     
-    // 获取比赛ID
-    QTableWidgetItem* gameIdItem = m_tableWidget->item(currentRow, 7); // 比赛ID在第7列
+    // 获取比赛ID (现在在第7列，因为没有头像)
+    QTableWidgetItem* gameIdItem = m_tableWidget->item(currentRow, 7);
     if (!gameIdItem) {
         QMessageBox::warning(this, tr("错误"), tr("无法获取比赛ID"));
         return;

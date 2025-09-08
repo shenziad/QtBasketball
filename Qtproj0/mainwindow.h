@@ -9,6 +9,7 @@
 #include <QPair>
 #include <QDir>
 #include <QMessageBox>
+#include "avatargenerator.h"
 
 QT_BEGIN_NAMESPACE
 class QTableWidget;

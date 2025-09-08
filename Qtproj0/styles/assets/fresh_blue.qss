@@ -28,7 +28,7 @@ QMainWindow QWidget#centralwidget,
 QTabWidget QWidget,
 QWidget[objectName="summaryTab"],
 QWidget[objectName="gamesTab"] {
-    background-color: #f8fafe !important;
+    background-color: #5181e1 !important;
 }
 
 /* 确保所有容器Widget都有统一背景 */
@@ -38,7 +38,7 @@ QWidget[class="container"] {
 
 /* 表格背景需要单独处理，保持白色以便阅读 */
 QTableWidget, QTableView {
-    background-color: white;
+    background-color: rgb(75, 232, 101);
 }
 
 /* 输入框等控件保持白色背景 */

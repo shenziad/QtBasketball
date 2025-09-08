@@ -12,6 +12,7 @@ SOURCES += \
     SearchAve_log.cpp \
     SearchTopteam_log.cpp \
     addgamestat_log.cpp \
+    avatargenerator.cpp \
     datamanage.cpp \
     main.cpp \
     mainwindow.cpp \
@@ -24,6 +25,7 @@ HEADERS += \
     SearchAve_log.h \
     SearchTopteam_log.h \
     addgamestat_log.h \
+    avatargenerator.h \
     datamanage.h \
     mainwindow.h \
     playerdatatable.h \
