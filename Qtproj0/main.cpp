@@ -49,7 +49,7 @@ int main(int argc, char *argv[])
     qDebug() << "应用程序目录:" << QCoreApplication::applicationDirPath();
     
     // 首先尝试加载清新蓝色主题
-    applyStyleSheet(a, "styles/assets/fresh_blue.qss");
+    /*applyStyleSheet(a, "styles/assets/fresh_blue.qss");
     
     if (a.styleSheet().isEmpty()) {
         qDebug() << "蓝色主题未加载，尝试优雅版本...";
@@ -68,7 +68,7 @@ int main(int argc, char *argv[])
     
     if (a.styleSheet().isEmpty()) {
         qDebug() << "所有样式表都未加载成功，使用默认样式";
-    }
+    }*/
     
     MainWindow w;
     w.show();

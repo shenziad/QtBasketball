@@ -2,6 +2,7 @@
 #include "datamanage.h"
 #include <QVBoxLayout>
 #include <QHBoxLayout>
+#include <QGridLayout>
 #include <QTableWidget>
 #include <QHeaderView>
 #include <QLabel>
@@ -11,6 +12,8 @@
 #include <QTextStream>
 #include <QFile>
 #include <QFont>
+#include <QDebug>
+#include <QMap>
 
 PlayerDataTable::PlayerDataTable(const QString& playerName, QWidget* parent)
     : QWidget(parent)
@@ -19,7 +22,6 @@ PlayerDataTable::PlayerDataTable(const QString& playerName, QWidget* parent)
     , m_titleLabel(nullptr)
     , m_exportButton(nullptr)
     , m_deleteButton(nullptr)
-    , m_averagesLabel(nullptr)
     , m_dataManager(nullptr)
 {
     setupUI();
@@ -34,69 +36,110 @@ PlayerDataTable::~PlayerDataTable()
 void PlayerDataTable::setupUI()
 {
     QVBoxLayout* mainLayout = new QVBoxLayout(this);
+    mainLayout->setSpacing(20);
+    mainLayout->setContentsMargins(25, 20, 25, 20);
     
-    // 创建顶部区域：头像 + 标题
-    QHBoxLayout* topLayout = new QHBoxLayout;
+    // === 头部区域 - 显示头像和姓名 ===
+    createHeaderSection(mainLayout);
     
-    // 创建球员头像
+    // === 比赛记录表格区域 ===
+    createTableSection(mainLayout);
+    
+    // === 底部操作按钮区域 ===
+    createActionButtons(mainLayout);
+    
+    setLayout(mainLayout);
+    setWindowTitle(tr("%1 - 技术统计详情").arg(m_playerName));
+    
+    // 设置窗口图标和属性
+    setWindowFlags(Qt::Window | Qt::WindowCloseButtonHint | Qt::WindowMinimizeButtonHint);
+    setAttribute(Qt::WA_DeleteOnClose);
+}
+
+void PlayerDataTable::createHeaderSection(QVBoxLayout* mainLayout)
+{
+    // 简单的头部容器
+    QWidget* headerWidget = new QWidget(this);
+    
+    QHBoxLayout* headerLayout = new QHBoxLayout(headerWidget);
+    headerLayout->setSpacing(15);
+    headerLayout->setContentsMargins(20, 15, 20, 15);
+    
+    // 球员头像
     QLabel* avatarLabel = new QLabel(this);
-    QPixmap avatar = AvatarGenerator::generateAvatar(m_playerName, 80, AvatarGenerator::Initials);
+    QPixmap avatar = AvatarGenerator::generateAvatar(m_playerName, 60, AvatarGenerator::Initials);
     avatarLabel->setPixmap(avatar);
-    avatarLabel->setFixedSize(80, 80);
+    avatarLabel->setFixedSize(60, 60);
     avatarLabel->setScaledContents(true);
     
-    // 标题
-    m_titleLabel = new QLabel(tr("%1 的技术统计表").arg(m_playerName), this);
-    QFont titleFont = m_titleLabel->font();
+    // 球员姓名
+    m_titleLabel = new QLabel(m_playerName, this);
+    QFont font = m_titleLabel->font();
+    font.setPointSize(16);
+    font.setBold(true);
+    m_titleLabel->setFont(font);
+    
+    headerLayout->addWidget(avatarLabel);
+    headerLayout->addWidget(m_titleLabel);
+    headerLayout->addStretch();
+    
+    mainLayout->addWidget(headerWidget);
+}
+
+void PlayerDataTable::createTableSection(QVBoxLayout* mainLayout)
+{
+    // 表格容器
+    QWidget* tableWidget = new QWidget(this);
+    
+    QVBoxLayout* tableLayout = new QVBoxLayout(tableWidget);
+    
+    // 表格标题
+    QLabel* tableTitle = new QLabel(tr("比赛记录明细"), this);
+    QFont titleFont = tableTitle->font();
     titleFont.setPointSize(14);
     titleFont.setBold(true);
-    m_titleLabel->setFont(titleFont);
-    m_titleLabel->setAlignment(Qt::AlignLeft | Qt::AlignVCenter);
-    
-    topLayout->addWidget(avatarLabel);
-    topLayout->addWidget(m_titleLabel, 1);  // 让标题占据剩余空间
-    topLayout->addStretch();
+    tableTitle->setFont(titleFont);
     
     // 表格
     m_tableWidget = new QTableWidget(this);
     
-    // 平均值标签
-    m_averagesLabel = new QLabel(this);
-    m_averagesLabel->setAlignment(Qt::AlignCenter);
+    tableLayout->addWidget(tableTitle);
+    tableLayout->addWidget(m_tableWidget);
     
-    // 创建按钮布局
+    mainLayout->addWidget(tableWidget);
+}
+
+void PlayerDataTable::createActionButtons(QVBoxLayout* mainLayout)
+{
+    // 按钮容器
     QHBoxLayout* buttonLayout = new QHBoxLayout;
+    buttonLayout->setSpacing(15);
     
     // 导出按钮
-    m_exportButton = new QPushButton(tr("导出到文件"), this);
+    m_exportButton = new QPushButton(tr("导出数据"), this);
     connect(m_exportButton, &QPushButton::clicked, this, &PlayerDataTable::exportToFile);
     
     // 删除按钮
-    m_deleteButton = new QPushButton(tr("删除选中记录"), this);
-    m_deleteButton->setStyleSheet("QPushButton { background-color: #ff6b6b; color: white; }");
+    m_deleteButton = new QPushButton(tr("删除记录"), this);
     connect(m_deleteButton, &QPushButton::clicked, this, &PlayerDataTable::deleteSelectedRecord);
     
     // 返回按钮
     QPushButton* returnButton = new QPushButton(tr("返回主界面"), this);
     connect(returnButton, &QPushButton::clicked, this, &QWidget::close);
     
+    buttonLayout->addStretch();
     buttonLayout->addWidget(m_exportButton);
     buttonLayout->addWidget(m_deleteButton);
     buttonLayout->addWidget(returnButton);
+    buttonLayout->addStretch();
     
-    mainLayout->addLayout(topLayout);
-    mainLayout->addWidget(m_tableWidget);
-    mainLayout->addWidget(m_averagesLabel);
     mainLayout->addLayout(buttonLayout);
-    
-    setLayout(mainLayout);
-    setWindowTitle(tr("%1 的技术统计").arg(m_playerName));
 }
 
 void PlayerDataTable::initializeTable()
 {
     QStringList headers;
-    headers << tr("日期") << tr("球队") << tr("得分") << tr("三分")
+    headers << tr("比赛日期") << tr("所属球队") << tr("得分") << tr("三分")
             << tr("篮板") << tr("扣篮") << tr("抢断") << tr("比赛ID");
     
     m_tableWidget->setColumnCount(headers.size());
@@ -106,16 +149,26 @@ void PlayerDataTable::initializeTable()
     m_tableWidget->setEditTriggers(QTableWidget::NoEditTriggers);
     m_tableWidget->setAlternatingRowColors(true);
     m_tableWidget->setSelectionBehavior(QTableWidget::SelectRows);
+    m_tableWidget->setSortingEnabled(true);
+    m_tableWidget->verticalHeader()->setVisible(false);
     
-    // 设置列宽
+    // 设置行高
+    m_tableWidget->verticalHeader()->setDefaultSectionSize(40);
+    
+    // 设置列宽 - 更加合理的分配
     m_tableWidget->horizontalHeader()->setSectionResizeMode(0, QHeaderView::ResizeToContents); // 日期
     m_tableWidget->horizontalHeader()->setSectionResizeMode(1, QHeaderView::ResizeToContents); // 球队
     
-    // 数据列固定宽度
-    for (int i = 2; i < headers.size(); ++i) {
-        m_tableWidget->horizontalHeader()->setSectionResizeMode(i, QHeaderView::Fixed);
-        m_tableWidget->setColumnWidth(i, 70);
-    }
+    // 数据列设置固定宽度
+    m_tableWidget->setColumnWidth(2, 80);  // 得分
+    m_tableWidget->setColumnWidth(3, 80);  // 三分  
+    m_tableWidget->setColumnWidth(4, 80);  // 篮板
+    m_tableWidget->setColumnWidth(5, 80);  // 扣篮
+    m_tableWidget->setColumnWidth(6, 80);  // 抢断
+    m_tableWidget->setColumnWidth(7, 90);  // 比赛ID
+    
+    // 最后一列自适应
+    m_tableWidget->horizontalHeader()->setSectionResizeMode(7, QHeaderView::Stretch);
 }
 
 QTableWidgetItem* PlayerDataTable::createReadOnlyItem(const QString& text) const
@@ -145,36 +198,8 @@ void PlayerDataTable::addGameRecord(const QDate& date, const QString& team,
 
 void PlayerDataTable::calculateAndShowAverages()
 {
-    if (m_tableWidget->rowCount() == 0) return;
-    
-    double totalPoints = 0, totalThrees = 0, totalRebounds = 0,
-           totalDunks = 0, totalSteals = 0;
-    
-    for (int row = 0; row < m_tableWidget->rowCount(); ++row) {
-        totalPoints += m_tableWidget->item(row, 2)->text().toDouble();
-        totalThrees += m_tableWidget->item(row, 3)->text().toDouble();
-        totalRebounds += m_tableWidget->item(row, 4)->text().toDouble();
-        totalDunks += m_tableWidget->item(row, 5)->text().toDouble();
-        totalSteals += m_tableWidget->item(row, 6)->text().toDouble();
-    }
-    
-    int games = m_tableWidget->rowCount();
-    
-    double avgPoints = totalPoints / games;
-    double avgThrees = totalThrees / games;
-    double avgRebounds = totalRebounds / games;
-    double avgDunks = totalDunks / games;
-    double avgSteals = totalSteals / games;
-    
-    QString averagesText = QString("场均数据：得分 %1  三分 %2  篮板 %3  扣篮 %4  抢断 %5  （共 %6 场比赛）")
-        .arg(avgPoints, 0, 'f', 1)
-        .arg(avgThrees, 0, 'f', 1)
-        .arg(avgRebounds, 0, 'f', 1)
-        .arg(avgDunks, 0, 'f', 1)
-        .arg(avgSteals, 0, 'f', 1)
-        .arg(games);
-        
-    m_averagesLabel->setText(averagesText);
+    // 由于移除了统计概览区域，此函数暂时保留为空
+    // 如果需要在其他地方显示统计信息，可以在此实现
 }
 
 void PlayerDataTable::exportToFile()
@@ -217,9 +242,6 @@ void PlayerDataTable::exportToFile()
         }
         out << "\"" << rowData.join("\",\"") << "\"\n";
     }
-    
-    // 写入平均值
-    out << "\n" << m_averagesLabel->text() << "\n";
     
     file.close();
     
@@ -264,9 +286,6 @@ void PlayerDataTable::deleteSelectedRecord()
         if (m_dataManager->deleteGameStat(gameId, m_playerName)) {
             // 从表格中删除该行
             m_tableWidget->removeRow(currentRow);
-            
-            // 重新计算平均值
-            calculateAndShowAverages();
             
             // 发出数据变化信号
             emit dataChanged();

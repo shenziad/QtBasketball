@@ -12,6 +12,7 @@ class QTableWidgetItem;
 class QLabel;
 class QPushButton;
 class QVBoxLayout;
+class QGridLayout;
 QT_END_NAMESPACE
 
 // 球员数据表格窗口类
@@ -51,6 +52,11 @@ private:
     void initializeTable();
     // 创建只读的表格项
     QTableWidgetItem* createReadOnlyItem(const QString& text) const;
+    
+    // UI创建方法
+    void createHeaderSection(QVBoxLayout* mainLayout);
+    void createTableSection(QVBoxLayout* mainLayout);
+    void createActionButtons(QVBoxLayout* mainLayout);
 
 private:
     // 成员变量
@@ -59,7 +65,6 @@ private:
     QLabel* m_titleLabel;        // 标题标签
     QPushButton* m_exportButton; // 导出按钮
     QPushButton* m_deleteButton; // 删除按钮
-    QLabel* m_averagesLabel;     // 平均值显示标签
     class DataManage* m_dataManager; // 数据管理器
 };
 

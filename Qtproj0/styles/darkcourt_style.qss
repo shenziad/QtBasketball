@@ -1,0 +1,208 @@
+/* Dark Court Style - Basketball Statistics Table */
+
+/* 主窗口样式 */
+#PlayerDataTable {
+    background-color: #1e1e1e;
+    font-family: 'Segoe UI', 'Microsoft YaHei', Arial, sans-serif;
+    color: #ffffff;
+}
+
+/* 头部容器样式 */
+#headerWidget {
+    background-color: #2d2d2d;
+    border-radius: 12px;
+    padding: 0px;
+    border: 1px solid #404040;
+}
+
+/* 球员头像样式 */
+#playerAvatar {
+    border-radius: 45px;
+    border: 3px solid #4a90e2;
+    background-color: #2d2d2d;
+}
+
+#avatarCaption {
+    color: #cccccc;
+    font-size: 11px;
+    font-weight: normal;
+}
+
+/* 球员信息样式 */
+#playerName {
+    font-size: 28px;
+    font-weight: bold;
+    color: #ffffff;
+    margin-bottom: 8px;
+}
+
+#teamLabel {
+    font-size: 16px;
+    color: #4a90e2;
+    font-weight: 600;
+    margin-bottom: 5px;
+}
+
+#reportLabel {
+    font-size: 13px;
+    color: #888888;
+    font-weight: normal;
+    margin-bottom: 8px;
+}
+
+#summaryLabel {
+    font-size: 12px;
+    color: #cccccc;
+    line-height: 1.5;
+    margin-top: 5px;
+}
+
+/* 快速统计区域 */
+#quickStatsTitle {
+    font-size: 16px;
+    font-weight: bold;
+    color: #ffffff;
+    margin-bottom: 10px;
+    text-align: center;
+}
+
+#statItem {
+    background-color: #404040;
+    border-radius: 8px;
+    border: 1px solid #555555;
+    margin: 2px;
+}
+
+#statValue {
+    font-size: 18px;
+    font-weight: bold;
+    color: #4a90e2;
+}
+
+#statLabel {
+    font-size: 10px;
+    color: #cccccc;
+    font-weight: normal;
+}
+
+/* 表格容器样式 */
+#tableWidget {
+    background-color: #2d2d2d;
+    border-radius: 12px;
+    padding: 20px;
+    border: 1px solid #404040;
+}
+
+/* 表格标题样式 */
+#tableTitle {
+    font-size: 18px;
+    font-weight: bold;
+    color: #ffffff;
+    margin-bottom: 15px;
+    background: transparent;
+}
+
+/* 表格样式 */
+#gameTable {
+    background-color: #3a3a3a;
+    border: 1px solid #555555;
+    border-radius: 8px;
+    font-size: 13px;
+    color: #ffffff;
+}
+
+#gameTable::item {
+    padding: 15px 10px;
+    border-bottom: 1px solid #555555;
+    background-color: transparent;
+}
+
+#gameTable::item:selected {
+    background-color: #4a90e2;
+    color: #ffffff;
+}
+
+#gameTable::item:hover {
+    background-color: #404040;
+}
+
+/* 表格头部样式 */
+#gameTable QHeaderView::section {
+    background-color: #2a2a2a;
+    color: #ffffff;
+    padding: 15px 10px;
+    border: none;
+    border-bottom: 2px solid #4a90e2;
+    font-weight: bold;
+    font-size: 12px;
+    text-align: center;
+}
+
+#gameTable QHeaderView::section:hover {
+    background-color: #404040;
+}
+
+/* 按钮样式 */
+#exportButton {
+    background-color: #4a90e2;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 15px 30px;
+    font-size: 14px;
+    font-weight: bold;
+    min-width: 130px;
+}
+
+#exportButton:hover {
+    background-color: #357abd;
+}
+
+#exportButton:pressed {
+    background-color: #2968a3;
+}
+
+#deleteButton {
+    background-color: #d32f2f;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 15px 30px;
+    font-size: 14px;
+    font-weight: bold;
+    min-width: 130px;
+}
+
+#deleteButton:hover {
+    background-color: #b71c1c;
+}
+
+#deleteButton:pressed {
+    background-color: #8c1010;
+}
+
+#returnButton {
+    background-color: #666666;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 15px 30px;
+    font-size: 14px;
+    font-weight: bold;
+    min-width: 130px;
+}
+
+#returnButton:hover {
+    background-color: #555555;
+}
+
+#returnButton:pressed {
+    background-color: #444444;
+}
+
+/* 头像样式 */
+QLabel[objectName*="avatar"] {
+    border-radius: 40px;
+    border: 3px solid #4a90e2;
+    background-color: #2d2d2d;
+}

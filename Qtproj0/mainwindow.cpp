@@ -16,22 +16,7 @@ MainWindow::MainWindow(QWidget *parent)
 {
     ui->setupUi(this);
     
-    // 设置统一背景色，解决白色区域问题
-    setStyleSheet("QMainWindow { background-color: #f8fafe; }");
-    ui->centralwidget->setStyleSheet("QWidget#centralwidget { background-color: #f8fafe; }");
-    
-    // 确保标签页内容区域背景一致
-    if (ui->tabWidget) {
-        ui->tabWidget->setStyleSheet("QTabWidget::pane { background-color: #f8fafe; }");
-        
-        // 为每个标签页设置背景
-        for (int i = 0; i < ui->tabWidget->count(); ++i) {
-            QWidget* tabPage = ui->tabWidget->widget(i);
-            if (tabPage) {
-                tabPage->setStyleSheet("QWidget { background-color: #f8fafe; }");
-            }
-        }
-    }
+    // 移除原有的背景色设置，新UI已包含内联样式
     
     initializePresetData();  // 初始化预设数据
     
@@ -128,6 +113,14 @@ void MainWindow::setupConnections()
     // 连接新比赛按钮
     connect(ui->newGameButton, &QPushButton::clicked,
             this, &MainWindow::on_actionNewGame_triggered);
+    
+    // 连接导入数据按钮        
+    connect(ui->importDataButton, &QPushButton::clicked,
+            this, &MainWindow::on_actionLoad_triggered);
+            
+    // 连接导出数据按钮
+    connect(ui->exportDataButton, &QPushButton::clicked,
+            this, &MainWindow::on_actionSave_triggered);
             
     // 连接菜单动作
     connect(ui->actionSave, &QAction::triggered,
