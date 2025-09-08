@@ -1,7 +1,0 @@
-<RCC>
-    <qresource prefix="/styles">
-        <file>styles/assets/basketball_elegant.qss</file>
-        <file>styles/assets/basketball_simple.qss</file>
-        <file>styles/assets/basketball_style.qss</file>
-    </qresource>
-</RCC>
