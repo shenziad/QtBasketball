@@ -36,14 +36,21 @@ void AddGameStat_Log::setupUI()
     ui->playersTable->setHorizontalHeaderLabels(headers);
     ui->playersTable->horizontalHeader()->setStretchLastSection(true);
     
-    QStringList teams;
-    teams << "湖人队" << "勇士队" << "公牛队" << "凯尔特人队" << "热火队" << "马刺队" << "尼克斯队" << "篮网队";
+    // 使用预设队伍数据
+    QStringList teams = m_dataManager->getPresetTeams();
     ui->teamComboBox->addItems(teams);
+    ui->teamComboBox->setEditable(true); // 设置为可编辑，允许输入新队伍
+    ui->teamComboBox->setInsertPolicy(QComboBox::NoInsert); // 不自动插入，手动处理
     
     QStringList playerNames = m_dataManager->getAllPlayerNames();
     QCompleter *completer = new QCompleter(playerNames, this);
     completer->setCaseSensitivity(Qt::CaseInsensitive);
+    completer->setCompletionMode(QCompleter::PopupCompletion);
     ui->nameLineEdit->setCompleter(completer);
+    
+    // 当用户从自动完成列表中选择时也触发队伍设置
+    connect(completer, QOverload<const QString &>::of(&QCompleter::activated),
+            this, &AddGameStat_Log::onPlayerNameChanged);
     
     ui->statusLabel->setText("准备添加球员统计数据");
 }
@@ -55,16 +62,29 @@ void AddGameStat_Log::setupConnections()
     connect(ui->clearInputsButton, &QPushButton::clicked, this, &AddGameStat_Log::clearInputs);
     connect(ui->finishButton, &QPushButton::clicked, this, &AddGameStat_Log::saveGameData);
     connect(ui->cancelButton, &QPushButton::clicked, this, &AddGameStat_Log::reject);
+    
+    // 连接球员姓名改变信号，自动设置队伍
+    connect(ui->nameLineEdit, &QLineEdit::textChanged, this, &AddGameStat_Log::onPlayerNameChanged);
 }
 
 void AddGameStat_Log::addPlayer()
 {
     QString name = ui->nameLineEdit->text().trimmed();
-    QString team = ui->teamComboBox->currentText();
+    QString team = ui->teamComboBox->currentText().trimmed();
     
     if (name.isEmpty()) {
         QMessageBox::warning(this, "警告", "请输入球员姓名！");
         return;
+    }
+    
+    if (team.isEmpty()) {
+        QMessageBox::warning(this, "警告", "请选择或输入球队名称！");
+        return;
+    }
+    
+    // 如果输入了新的队伍名称，添加到下拉框中（避免重复）
+    if (ui->teamComboBox->findText(team) == -1) {
+        ui->teamComboBox->addItem(team);
     }
     
     // Check if player already exists in current game
@@ -231,4 +251,64 @@ void AddGameStat_Log::selectPresetPlayers()
                                    .arg(selectedPlayers.size()));
         }
     }
+}
+
+void AddGameStat_Log::onPlayerNameChanged()
+{
+    QString currentName = ui->nameLineEdit->text().trimmed();
+    
+    if (currentName.isEmpty()) {
+        ui->statusLabel->setText("准备添加球员统计数据");
+        return;
+    }
+    
+    // 首先检查预设球员中是否有这个球员
+    QVector<QPair<QString, QString>> presetPlayers = m_dataManager->getPresetPlayers();
+    for (const auto& player : presetPlayers) {
+        if (player.first == currentName) {
+            QString playerTeam = player.second;
+            
+            // 查找队伍在下拉框中的索引
+            int teamIndex = ui->teamComboBox->findText(playerTeam);
+            if (teamIndex != -1) {
+                ui->teamComboBox->setCurrentIndex(teamIndex);
+            } else {
+                // 如果队伍不在列表中，添加并选择
+                ui->teamComboBox->addItem(playerTeam);
+                ui->teamComboBox->setCurrentText(playerTeam);
+            }
+            
+            // 更新状态提示
+            ui->statusLabel->setText(QString("预设球员: %1 (%2)").arg(currentName).arg(playerTeam));
+            return;
+        }
+    }
+    
+    // 然后检查数据库中是否存在这个球员
+    if (m_dataManager->isPlayerExists(currentName)) {
+        const PlayerStatsSummary* summary = m_dataManager->getPlayerSummary(currentName);
+        if (summary) {
+            QString playerTeam = summary->team;
+            
+            // 查找队伍在下拉框中的索引
+            int teamIndex = ui->teamComboBox->findText(playerTeam);
+            if (teamIndex != -1) {
+                ui->teamComboBox->setCurrentIndex(teamIndex);
+            } else {
+                // 如果队伍不在列表中，添加并选择
+                ui->teamComboBox->addItem(playerTeam);
+                ui->teamComboBox->setCurrentText(playerTeam);
+            }
+            
+            // 更新状态提示
+            ui->statusLabel->setText(QString("已找到球员: %1 (%2) - 已参加 %3 场比赛")
+                                   .arg(currentName)
+                                   .arg(playerTeam)
+                                   .arg(summary->gamesPlayed));
+            return;
+        }
+    }
+    
+    // 如果没找到匹配的球员，显示新球员提示
+    ui->statusLabel->setText(QString("新球员: %1 - 请选择或输入队伍").arg(currentName));
 }

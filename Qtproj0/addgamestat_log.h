@@ -24,6 +24,7 @@ private slots:
     void saveGameData();          // 保存比赛数据
     void clearInputs();           // 清空输入框
     void selectPresetPlayers();   // 选择预设球员
+    void onPlayerNameChanged();   // 当球员姓名改变时自动设置队伍
 
 private:
     Ui::AddGameStat_Log *ui;

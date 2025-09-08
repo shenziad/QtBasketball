@@ -442,9 +442,10 @@
     <property name="title">
      <string>查询分析</string>
     </property>
-    <addaction name="actionShowSummary"/>
     <addaction name="actionTopThree"/>
     <addaction name="actionTeamTopThree"/>
+    <addaction name="separator"/>
+    <addaction name="actionShowSummary"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuQuery"/>
@@ -468,11 +469,6 @@
     <string>加载数据</string>
    </property>
   </action>
-  <action name="actionShowSummary">
-   <property name="text">
-    <string>查看汇总数据</string>
-   </property>
-  </action>
   <action name="actionTopThree">
    <property name="text">
     <string>平均数据排名</string>
@@ -481,6 +477,11 @@
   <action name="actionTeamTopThree">
    <property name="text">
     <string>队内排名分析</string>
+   </property>
+  </action>
+  <action name="actionShowSummary">
+   <property name="text">
+    <string>查看汇总数据</string>
    </property>
   </action>
  </widget>

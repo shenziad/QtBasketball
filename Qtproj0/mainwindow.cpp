@@ -8,6 +8,7 @@
 #include <QFileDialog>
 #include <QDate>
 #include <QFileInfo>
+#include <QMessageBox>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -127,8 +128,6 @@ void MainWindow::setupConnections()
             this, &MainWindow::on_actionSave_triggered);
     connect(ui->actionLoad, &QAction::triggered,
             this, &MainWindow::on_actionLoad_triggered);
-    connect(ui->actionShowSummary, &QAction::triggered,
-            this, &MainWindow::on_actionShowSummary_triggered);
     connect(ui->actionTopThree, &QAction::triggered,
             this, &MainWindow::on_actionTopThree_triggered);
     connect(ui->actionTeamTopThree, &QAction::triggered,
@@ -333,10 +332,14 @@ void MainWindow::updateDisplay()
         ui->gamesTableWidget->setItem(i, col++, createReadOnlyItem(QString::number(game.getDunks())));
         ui->gamesTableWidget->setItem(i, col++, createReadOnlyItem(QString::number(game.getSteals())));
         
-        // 设置比赛ID，右对齐显示
-        QTableWidgetItem* idItem = createReadOnlyItem(QString::number(i + 1));
-        idItem->setTextAlignment(Qt::AlignRight | Qt::AlignVCenter);
-        ui->gamesTableWidget->setItem(i, col++, idItem);
+        // 设置比赛名称，如果为空则显示默认名称
+        QString gameName = game.getGameName();
+        if (gameName.isEmpty()) {
+            gameName = QString("比赛 #%1").arg(game.getGameId());
+        }
+        QTableWidgetItem* nameItem = createReadOnlyItem(gameName);
+        nameItem->setTextAlignment(Qt::AlignLeft | Qt::AlignVCenter);
+        ui->gamesTableWidget->setItem(i, col++, nameItem);
     }
     ui->gamesTableWidget->resizeColumnsToContents();
     
@@ -461,6 +464,45 @@ void MainWindow::on_actionLoad_triggered()
 
 void MainWindow::on_actionShowSummary_triggered()
 {
+    // 获取基本数据
+    QVector<PlayerStatsSummary> summaries = m_dataManager->getAllPlayersSummary();
+    QVector<PlayerStats> games = m_dataManager->getAllGames();
+    
+    if (summaries.isEmpty() && games.isEmpty()) {
+        QMessageBox::information(this, "数据汇总", "当前没有任何数据记录");
+        return;
+    }
+    
+    // 基本统计信息
+    int totalPlayers = summaries.size();
+    int totalGames = games.size();
+    
+    // 找出得分最高的球员和场均得分
+    QString topPlayer = "暂无";
+    double maxAvgPoints = 0;
+    for (const PlayerStatsSummary& summary : summaries) {
+        double avgPoints = summary.getAveragePoints();
+        if (avgPoints > maxAvgPoints) {
+            maxAvgPoints = avgPoints;
+            topPlayer = summary.name;
+        }
+    }
+    
+    // 构建简单的汇总信息
+    QString summaryText = QString(
+        "篮球联赛数据汇总\n\n"
+        "球员总数：%1 名\n"
+        "比赛场次：%2 场\n\n"
+        "得分王：%3\n"
+        "场均得分：%4 分"
+    ).arg(totalPlayers)
+     .arg(totalGames)
+     .arg(topPlayer)
+     .arg(maxAvgPoints, 0, 'f', 1);
+    
+    QMessageBox::information(this, "联赛数据汇总", summaryText);
+    
+    // 最后刷新显示
     updateDisplay();
 }
 

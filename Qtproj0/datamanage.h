@@ -30,6 +30,10 @@ public:
     QVector<PlayerStatsSummary> getTopThreeInTeam(const QString& team) const;
     QStringList getAllTeams() const;
     QStringList getAllPlayerNames() const;
+    
+    // 获取预设数据
+    QStringList getPresetTeams() const { return m_presetTeams; }
+    QVector<QPair<QString, QString>> getPresetPlayers() const { return m_presetPlayers; }
 
     // 数据验证
     bool isPlayerExists(const QString& name) const { return m_summaryStats.contains(name); }
