@@ -229,7 +229,7 @@
        </property>
        <widget class="QWidget" name="summaryTab">
         <attribute name="title">
-         <string>📊 球员数据汇总</string>
+         <string>球员数据汇总</string>
         </attribute>
         <layout class="QVBoxLayout" name="summaryTabLayout">
          <property name="spacing">
@@ -312,7 +312,7 @@
        </widget>
        <widget class="QWidget" name="gamesTab">
         <attribute name="title">
-         <string>🏀 比赛记录详情</string>
+         <string>比赛记录详情</string>
         </attribute>
         <layout class="QVBoxLayout" name="gamesTabLayout">
          <property name="spacing">
@@ -460,27 +460,27 @@
   </widget>
   <action name="actionSave">
    <property name="text">
-    <string>💾 保存数据</string>
+    <string>保存数据</string>
    </property>
   </action>
   <action name="actionLoad">
    <property name="text">
-    <string>📂 加载数据</string>
+    <string>加载数据</string>
    </property>
   </action>
   <action name="actionShowSummary">
    <property name="text">
-    <string>📈 查看汇总数据</string>
+    <string>查看汇总数据</string>
    </property>
   </action>
   <action name="actionTopThree">
    <property name="text">
-    <string>🏆 平均数据排名</string>
+    <string>平均数据排名</string>
    </property>
   </action>
   <action name="actionTeamTopThree">
    <property name="text">
-    <string>👥 队内排名分析</string>
+    <string>队内排名分析</string>
    </property>
   </action>
  </widget>

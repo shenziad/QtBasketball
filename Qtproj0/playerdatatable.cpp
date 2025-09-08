@@ -1,4 +1,5 @@
 #include "playerdatatable.h"
+#include "playerchartwidget.h"
 #include "datamanage.h"
 #include <QVBoxLayout>
 #include <QHBoxLayout>
@@ -22,7 +23,9 @@ PlayerDataTable::PlayerDataTable(const QString& playerName, QWidget* parent)
     , m_titleLabel(nullptr)
     , m_exportButton(nullptr)
     , m_deleteButton(nullptr)
+    , m_chartButton(nullptr)
     , m_dataManager(nullptr)
+    , m_chartWidget(nullptr)
 {
     setupUI();
     initializeTable();
@@ -123,6 +126,11 @@ void PlayerDataTable::createActionButtons(QVBoxLayout* mainLayout)
     m_deleteButton = new QPushButton(tr("删除记录"), this);
     connect(m_deleteButton, &QPushButton::clicked, this, &PlayerDataTable::deleteSelectedRecord);
     
+    // 图表分析按钮
+    m_chartButton = new QPushButton(tr("图表分析"), this);
+    m_chartButton->setStyleSheet("QPushButton { background-color: #27ae60; color: white; }");
+    connect(m_chartButton, &QPushButton::clicked, this, &PlayerDataTable::showChartAnalysis);
+    
     // 返回按钮
     QPushButton* returnButton = new QPushButton(tr("返回主界面"), this);
     connect(returnButton, &QPushButton::clicked, this, &QWidget::close);
@@ -130,6 +138,7 @@ void PlayerDataTable::createActionButtons(QVBoxLayout* mainLayout)
     buttonLayout->addStretch();
     buttonLayout->addWidget(m_exportButton);
     buttonLayout->addWidget(m_deleteButton);
+    buttonLayout->addWidget(m_chartButton);
     buttonLayout->addWidget(returnButton);
     buttonLayout->addStretch();
     
@@ -297,4 +306,40 @@ void PlayerDataTable::deleteSelectedRecord()
                 tr("删除比赛记录时发生错误"));
         }
     }
+}
+
+void PlayerDataTable::showChartAnalysis()
+{
+    if (!m_chartWidget) {
+        m_chartWidget = new PlayerChartWidget(m_playerName);
+        
+        // 计算球员的平均数据用于图表显示
+        if (m_tableWidget && m_tableWidget->rowCount() > 0) {
+            double totalPoints = 0, totalRebounds = 0, totalAssists = 0, totalSteals = 0, totalDunks = 0;
+            int gameCount = m_tableWidget->rowCount();
+            
+            for (int row = 0; row < gameCount; ++row) {
+                totalPoints += m_tableWidget->item(row, 2) ? m_tableWidget->item(row, 2)->text().toDouble() : 0;
+                totalRebounds += m_tableWidget->item(row, 4) ? m_tableWidget->item(row, 4)->text().toDouble() : 0;
+                totalAssists += m_tableWidget->item(row, 5) ? m_tableWidget->item(row, 5)->text().toDouble() : 0;
+                totalSteals += m_tableWidget->item(row, 6) ? m_tableWidget->item(row, 6)->text().toDouble() : 0;
+                totalDunks += m_tableWidget->item(row, 5) ? m_tableWidget->item(row, 5)->text().toDouble() : 0; // 扣篮数据
+            }
+            
+            // 设置图表数据
+            std::vector<ChartData> chartData = {
+                {"得分", totalPoints / gameCount, QColor(255, 99, 132)},
+                {"篮板", totalRebounds / gameCount, QColor(54, 162, 235)},
+                {"助攻", totalAssists / gameCount, QColor(255, 205, 86)},
+                {"抢断", totalSteals / gameCount, QColor(75, 192, 192)},
+                {"扣篮", totalDunks / gameCount, QColor(153, 102, 255)}
+            };
+            
+            m_chartWidget->setChartData(chartData);
+        }
+    }
+    
+    m_chartWidget->show();
+    m_chartWidget->raise();
+    m_chartWidget->activateWindow();
 }

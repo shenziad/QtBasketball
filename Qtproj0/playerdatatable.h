@@ -6,6 +6,9 @@
 #include <QtCore/QDate>
 #include "avatargenerator.h"
 
+// 前向声明
+class PlayerChartWidget;
+
 QT_BEGIN_NAMESPACE
 class QTableWidget;
 class QTableWidgetItem;
@@ -44,6 +47,8 @@ private slots:
     void exportToFile();
     // 删除选中的记录
     void deleteSelectedRecord();
+    // 显示图表分析
+    void showChartAnalysis();
 
 private:
     // 初始化UI布局
@@ -65,7 +70,9 @@ private:
     QLabel* m_titleLabel;        // 标题标签
     QPushButton* m_exportButton; // 导出按钮
     QPushButton* m_deleteButton; // 删除按钮
+    QPushButton* m_chartButton;  // 图表按钮
     class DataManage* m_dataManager; // 数据管理器
+    PlayerChartWidget* m_chartWidget; // 图表窗口
 };
 
 #endif // PLAYERDATATABLE_H
